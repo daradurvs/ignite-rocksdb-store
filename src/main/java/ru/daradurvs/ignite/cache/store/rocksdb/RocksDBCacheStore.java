@@ -1,6 +1,5 @@
 package ru.daradurvs.ignite.cache.store.rocksdb;
 
-import java.io.IOException;
 import javax.cache.Cache;
 import javax.cache.integration.CacheLoaderException;
 import javax.cache.integration.CacheWriterException;
@@ -8,6 +7,8 @@ import org.apache.ignite.cache.store.CacheStoreAdapter;
 import org.rocksdb.ColumnFamilyHandle;
 import org.rocksdb.RocksDB;
 import org.rocksdb.RocksDBException;
+import ru.daradurvs.ignite.cache.store.rocksdb.serializer.JavaSerializer;
+import ru.daradurvs.ignite.cache.store.rocksdb.serializer.Serialiazer;
 
 /**
  * @author Vyacheslav Daradur
@@ -16,7 +17,7 @@ import org.rocksdb.RocksDBException;
 public class RocksDBCacheStore<K, V> extends CacheStoreAdapter<K, V> {
     private final RocksDB db;
     //    private final ColumnFamilyHandle handle;
-    private final JavaSerializer serializer;
+    private final Serialiazer serializer;
 
     public RocksDBCacheStore(RocksDB db, ColumnFamilyHandle handle) {
         this.db = db;
@@ -30,7 +31,7 @@ public class RocksDBCacheStore<K, V> extends CacheStoreAdapter<K, V> {
 //            return (V)serializer.deserialize(db.get(handle, serializer.serialize(key)));
             return (V)serializer.deserialize(db.get(serializer.serialize(key)));
         }
-        catch (RocksDBException | IOException | ClassNotFoundException e) {
+        catch (RocksDBException e) {
             throw new CacheLoaderException("Couldn't load a value for the key: " + key, e);
         }
     }
@@ -45,7 +46,7 @@ public class RocksDBCacheStore<K, V> extends CacheStoreAdapter<K, V> {
                 serializer.serialize(entry.getValue())
             );
         }
-        catch (RocksDBException | IOException e) {
+        catch (RocksDBException e) {
             throw new CacheWriterException("Couldn't put entry, key: " + entry.getKey() + "; value: " + entry.getValue(), e);
         }
     }
@@ -55,7 +56,7 @@ public class RocksDBCacheStore<K, V> extends CacheStoreAdapter<K, V> {
 //            db.delete(handle, serializer.serialize(key));
             db.delete(serializer.serialize(key));
         }
-        catch (RocksDBException | IOException e) {
+        catch (RocksDBException e) {
             throw new CacheWriterException("Couldn't delete a value for the key: " + key, e);
         }
     }

@@ -1,19 +1,20 @@
-package ru.daradurvs.ignite.cache.store.rocksdb;
+package ru.daradurvs.ignite.cache.store.rocksdb.serializer;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.Arrays;
 
 /**
  * @author Vyacheslav Daradur
  * @since 25.10.2017
  */
-public class JavaSerializer {
+public class JavaSerializer implements Serialiazer {
     private static final int BUFFER_SIZE = 4096;
 
-    public byte[] serialize(Object obj) throws IOException {
+    @Override public byte[] serialize(Object obj) {
         if (obj == null)
             return null;
 
@@ -24,11 +25,17 @@ public class JavaSerializer {
 
             return baos.toByteArray();
         }
+        catch (IOException e) {
+            throw new IllegalArgumentException("Couldn't serialize object of the class: " + obj.getClass().getSimpleName(), e);
+        }
     }
 
-    public Object deserialize(byte[] bytes) throws IOException, ClassNotFoundException {
+    @Override public Object deserialize(byte[] bytes) {
         try (ObjectInputStream in = new ObjectInputStream(new ByteArrayInputStream(bytes))) {
             return in.readObject();
+        }
+        catch (IOException | ClassNotFoundException e) {
+            throw new IllegalArgumentException("Couldn't deserialize bytes array: " + Arrays.toString(bytes), e);
         }
     }
 }
