@@ -14,37 +14,35 @@ import org.rocksdb.RocksDBException;
  */
 public class Main {
     public static void main(String[] args) throws Exception {
-        try (DBManager h = new DBManager()) {
-            IgniteConfiguration cfg = new IgniteConfiguration();
+        IgniteConfiguration cfg = new IgniteConfiguration();
 
-            final String cacheName = "testCacheName";
+        final String cacheName = "testCacheName";
 
-            try (Ignite ignite = Ignition.start(cfg)) {
-                IgniteCache<Integer, String> cache = ignite.getOrCreateCache(getCacheConfiguration(cacheName));
+        try (Ignite ignite = Ignition.start(cfg)) {
+            IgniteCache<Integer, String> cache = ignite.getOrCreateCache(getCacheConfiguration(cacheName, ignite.configuration()));
 
-                for (int i = 0; i < 10; i++) {
-                    cache.put(i, "test" + i); // put with persistence
-                }
+            for (int i = 0; i < 10; i++) {
+                cache.put(i, "test" + i); // put with persistence
             }
+        }
 
-            try (Ignite ignite = Ignition.start(cfg)) {
-                IgniteCache<Integer, String> cache = ignite.getOrCreateCache(getCacheConfiguration(cacheName));
+        try (Ignite ignite = Ignition.start(cfg)) {
+            IgniteCache<Integer, String> cache = ignite.getOrCreateCache(getCacheConfiguration(cacheName, ignite.configuration()));
 
-                for (int i = 0; i < 10; i++) {
-                    System.out.println(cache.get(i)); // get from persistence
-                }
+            for (int i = 0; i < 10; i++) {
+                System.out.println(cache.get(i)); // get from persistence
             }
         }
     }
 
-    private static CacheConfiguration<Integer, String> getCacheConfiguration(String cacheName)
+    private static CacheConfiguration<Integer, String> getCacheConfiguration(String cacheName, IgniteConfiguration cfg)
         throws RocksDBException, IOException {
         CacheConfiguration<Integer, String> cacheCfg = new CacheConfiguration<>();
         cacheCfg.setName(cacheName);
         cacheCfg.setWriteThrough(true);
         cacheCfg.setReadThrough(true);
 
-        RocksDBCacheStoreFactory<Integer, String> factory = new RocksDBCacheStoreFactory<>(cacheName);
+        RocksDBCacheStoreFactory<Integer, String> factory = new RocksDBCacheStoreFactory<>(cacheName, cfg);
 
         cacheCfg.setCacheStoreFactory(factory);
 

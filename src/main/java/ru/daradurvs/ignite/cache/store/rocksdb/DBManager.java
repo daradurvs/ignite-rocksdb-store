@@ -81,7 +81,7 @@ public class DBManager implements AutoCloseable {
     private static class BytesArrayWrapper {
         byte[] arr;
 
-        public BytesArrayWrapper(byte[] arr) {
+        private BytesArrayWrapper(byte[] arr) {
             this.arr = arr;
         }
 
