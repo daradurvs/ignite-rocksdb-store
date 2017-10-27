@@ -33,6 +33,14 @@ public class DBManager implements AutoCloseable {
 
         List<byte[]> columnFamilyNames = RocksDB.listColumnFamilies(options, PATH_TO_DATABASE);
 
+        if (columnFamilyNames.isEmpty()) {
+            RocksDB db = RocksDB.open(options, PATH_TO_DATABASE);
+
+            COLUMN_FAMILY_HANDLES.put(new BytesArrayWrapper(RocksDB.DEFAULT_COLUMN_FAMILY), db.getDefaultColumnFamily());
+
+            return db;
+        }
+
         List<ColumnFamilyDescriptor> descriptors = new ArrayList<>();
 
         for (byte[] name : columnFamilyNames) {

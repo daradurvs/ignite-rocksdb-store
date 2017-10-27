@@ -28,14 +28,26 @@ public class RocksDBCacheStoreFactory<K, V> implements Factory<RocksDBCacheStore
         this.cacheName = cacheName;
 
         LifecycleBean[] beans = cfg.getLifecycleBeans();
-        if (beans != null) {
-            final int n = beans.length;
-            beans = Arrays.copyOf(beans, n + 1);
-            beans[n] = new DestructorLifecycleBean();
-            cfg.setLifecycleBeans(beans);
+
+        if (beans == null) {
+            cfg.setLifecycleBeans(new DestructorLifecycleBean());
         }
         else {
-            cfg.setLifecycleBeans(new DestructorLifecycleBean());
+            boolean found = false;
+
+            for (LifecycleBean bean : beans) {
+                if (bean instanceof DestructorLifecycleBean) {
+                    found = true;
+                    break;
+                }
+            }
+
+            if (!found) {
+                final int n = beans.length;
+                beans = Arrays.copyOf(beans, n + 1);
+                beans[n] = new DestructorLifecycleBean();
+                cfg.setLifecycleBeans(beans);
+            }
         }
     }
 
