@@ -1,9 +1,10 @@
 package ru.daradurvs.ignite.cache.store.rocksdb;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import org.rocksdb.ColumnFamilyDescriptor;
 import org.rocksdb.ColumnFamilyHandle;
 import org.rocksdb.Options;
@@ -16,52 +17,87 @@ import org.rocksdb.RocksDBException;
  */
 public class DBManager implements AutoCloseable {
     private static final String PATH_TO_DATABASE = "c:/TEMP/rocksdb";
-    private static final Map<byte[], ColumnFamilyHandle> COLUMN_FAMILY_HANDLES = new HashMap<>();
-
-    public static void main(String[] args) throws Exception {
-        try (Options options = new Options()) {
-            options.setCreateIfMissing(true);
-
-            List<byte[]> columnFamilyNames = RocksDB.listColumnFamilies(options, PATH_TO_DATABASE);
-
-            List<ColumnFamilyDescriptor> descriptors = new ArrayList<>();
-
-            for (byte[] name : columnFamilyNames) {
-                descriptors.add(new ColumnFamilyDescriptor(name));
-            }
-
-            List<ColumnFamilyHandle> handles = new ArrayList<>();
-
-            try (RocksDB db = RocksDB.open(PATH_TO_DATABASE, descriptors, handles)) {
-                assert descriptors.size() == handles.size();
-
-                for (int i = 0; i < descriptors.size(); i++) {
-                    byte[] name = descriptors.get(i).columnFamilyName();
-
-                    COLUMN_FAMILY_HANDLES.put(name, handles.get(i));
-                }
-
-                for (byte[] bytes : COLUMN_FAMILY_HANDLES.keySet()) {
-                    System.out.println(new String(bytes));
-                    System.out.println(COLUMN_FAMILY_HANDLES.get(bytes));
-                }
-            }
-        }
-    }
-
-
+    private static final Map<BytesArrayWrapper, ColumnFamilyHandle> COLUMN_FAMILY_HANDLES = new ConcurrentHashMap<>();
 
     private static RocksDB db;
 
     public static RocksDB db() throws RocksDBException {
         if (db == null)
-            db = RocksDB.open("c:/TEMP/rocksdb");
+            db = open();
 
         return db;
     }
 
-    @Override public void close() throws Exception {
-        if (db != null)
+    protected static RocksDB open() throws RocksDBException {
+        Options options = new Options().setCreateIfMissing(true);
+
+        List<byte[]> columnFamilyNames = RocksDB.listColumnFamilies(options, PATH_TO_DATABASE);
+
+        List<ColumnFamilyDescriptor> descriptors = new ArrayList<>();
+
+        for (byte[] name : columnFamilyNames) {
+            descriptors.add(new ColumnFamilyDescriptor(name));
+        }
+
+        List<ColumnFamilyHandle> handles = new ArrayList<>();
+
+        RocksDB db = RocksDB.open(PATH_TO_DATABASE, descriptors, handles);
+
+        assert descriptors.size() == handles.size();
+
+        for (int i = 0; i < descriptors.size(); i++) {
+            byte[] name = descriptors.get(i).columnFamilyName();
+
+            COLUMN_FAMILY_HANDLES.put(new BytesArrayWrapper(name), handles.get(i));
+        }
+
+        return db;
+    }
+
+    public static ColumnFamilyHandle initColumnFamilyHandle(String cacheName) throws RocksDBException {
+        byte[] name = cacheName.getBytes();
+
+        BytesArrayWrapper key = new BytesArrayWrapper(name);
+
+        ColumnFamilyHandle handle = COLUMN_FAMILY_HANDLES.get(key);
+
+        if (handle == null) {
+            handle = db().createColumnFamily(new ColumnFamilyDescriptor(name));
+
+            COLUMN_FAMILY_HANDLES.put(key, handle);
+        }
+
+        return handle;
+    }
+
+    @Override public void close() throws RocksDBException {
+        if (db != null) {
             db.close();
+            COLUMN_FAMILY_HANDLES.clear();
+            db = null;
+        }
+    }
+
+    private static class BytesArrayWrapper {
+        byte[] arr;
+
+        public BytesArrayWrapper(byte[] arr) {
+            this.arr = arr;
+        }
+
+        @Override public boolean equals(Object o) {
+            if (this == o)
+                return true;
+            if (o == null || getClass() != o.getClass())
+                return false;
+
+            BytesArrayWrapper wrapper = (BytesArrayWrapper)o;
+
+            return Arrays.equals(arr, wrapper.arr);
+        }
+
+        @Override public int hashCode() {
+            return Arrays.hashCode(arr);
+        }
     }
 }

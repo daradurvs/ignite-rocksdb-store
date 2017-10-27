@@ -44,7 +44,7 @@ public class Main {
         cacheCfg.setWriteThrough(true);
         cacheCfg.setReadThrough(true);
 
-        RocksDBCacheStoreFactory<Integer, String> factory = new RocksDBCacheStoreFactory<>();
+        RocksDBCacheStoreFactory<Integer, String> factory = new RocksDBCacheStoreFactory<>(cacheName);
 
         cacheCfg.setCacheStoreFactory(factory);
 
