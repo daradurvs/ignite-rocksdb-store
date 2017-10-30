@@ -42,7 +42,7 @@ public class Main {
         cacheCfg.setWriteThrough(true);
         cacheCfg.setReadThrough(true);
 
-        RocksDBCacheStoreFactory<Integer, String> factory = new RocksDBCacheStoreFactory<>(cacheName, cfg);
+        RocksDBCacheStoreFactory<Integer, String> factory = new RocksDBCacheStoreFactory<>("c:/TEMP/rocksdb3", cacheName, cfg);
 
         cacheCfg.setCacheStoreFactory(factory);
 

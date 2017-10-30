@@ -8,7 +8,6 @@ import org.apache.ignite.configuration.IgniteConfiguration;
 import org.apache.ignite.lifecycle.LifecycleBean;
 import org.apache.ignite.lifecycle.LifecycleEventType;
 import org.rocksdb.ColumnFamilyHandle;
-import org.rocksdb.RocksDB;
 import org.rocksdb.RocksDBException;
 
 import static org.apache.ignite.lifecycle.LifecycleEventType.AFTER_NODE_STOP;
@@ -18,13 +17,13 @@ import static org.apache.ignite.lifecycle.LifecycleEventType.AFTER_NODE_STOP;
  * @since 23.10.2017
  */
 public class RocksDBCacheStoreFactory<K, V> implements Factory<RocksDBCacheStore<K, V>>, Serializable {
+    private static final long serialVersionUID = 0L;
+
+    private String pathToDB;
     private String cacheName;
 
-    static {
-        RocksDB.loadLibrary();
-    }
-
-    public RocksDBCacheStoreFactory(String cacheName, IgniteConfiguration cfg) {
+    public RocksDBCacheStoreFactory(String pathToDB, String cacheName, IgniteConfiguration cfg) {
+        this.pathToDB = pathToDB;
         this.cacheName = cacheName;
 
         LifecycleBean[] beans = cfg.getLifecycleBeans();
@@ -54,10 +53,10 @@ public class RocksDBCacheStoreFactory<K, V> implements Factory<RocksDBCacheStore
     /** {@inheritDoc} */
     @Override public RocksDBCacheStore<K, V> create() {
         try {
-            RocksDB db = DBManager.db();
-            ColumnFamilyHandle handle = DBManager.initColumnFamilyHandle(cacheName);
+            RocksDBWrapper rocksDBWrapper = DBManager.db(pathToDB);
+            ColumnFamilyHandle handle = RocksDBWrapper.initColumnFamilyHandle(cacheName);
 
-            return new RocksDBCacheStore<>(db, handle);
+            return new RocksDBCacheStore<>(rocksDBWrapper.db(), handle);
         }
         catch (RocksDBException e) {
             throw new IllegalStateException(e);
@@ -68,7 +67,7 @@ public class RocksDBCacheStoreFactory<K, V> implements Factory<RocksDBCacheStore
         @Override public void onLifecycleEvent(LifecycleEventType evt) throws IgniteException {
             try {
                 if (evt == AFTER_NODE_STOP)
-                    new DBManager().close();
+                    DBManager.closeAll();
             }
             catch (RocksDBException e) {
                 throw new IgniteException("Couldn't close RocksDB instances connection.", e);
