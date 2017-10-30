@@ -59,7 +59,7 @@ public class RocksDBCacheStoreFactory<K, V> implements Factory<RocksDBCacheStore
             return new RocksDBCacheStore<>(dbWrapper.db(), handle);
         }
         catch (RocksDBException e) {
-            throw new IllegalStateException(e);
+            throw new IllegalStateException("Couldn't initialize RocksDB instance.", e);
         }
     }
 
