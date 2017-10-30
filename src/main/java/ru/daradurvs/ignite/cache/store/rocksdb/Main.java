@@ -21,7 +21,7 @@ public class Main {
         try (Ignite ignite = Ignition.start(cfg)) {
             IgniteCache<Integer, String> cache = ignite.getOrCreateCache(getCacheConfiguration(cacheName, ignite.configuration()));
 
-            for (int i = 0; i < 10; i++) {
+            for (int i = 0; i < 100_000; i++) {
                 cache.put(i, "test" + i); // put with persistence
             }
         }
@@ -29,7 +29,7 @@ public class Main {
         try (Ignite ignite = Ignition.start(cfg)) {
             IgniteCache<Integer, String> cache = ignite.getOrCreateCache(getCacheConfiguration(cacheName, ignite.configuration()));
 
-            for (int i = 0; i < 10; i++) {
+            for (int i = 0; i < 100_000; i++) {
                 System.out.println(cache.get(i)); // get from persistence
             }
         }

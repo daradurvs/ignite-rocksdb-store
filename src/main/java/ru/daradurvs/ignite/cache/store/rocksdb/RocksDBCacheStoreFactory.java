@@ -53,10 +53,10 @@ public class RocksDBCacheStoreFactory<K, V> implements Factory<RocksDBCacheStore
     /** {@inheritDoc} */
     @Override public RocksDBCacheStore<K, V> create() {
         try {
-            RocksDBWrapper rocksDBWrapper = DBManager.db(pathToDB);
-            ColumnFamilyHandle handle = RocksDBWrapper.initColumnFamilyHandle(cacheName);
+            RocksDBWrapper dbWrapper = DBManager.db(pathToDB);
+            ColumnFamilyHandle handle = dbWrapper.initColumnFamilyHandle(cacheName);
 
-            return new RocksDBCacheStore<>(rocksDBWrapper.db(), handle);
+            return new RocksDBCacheStore<>(dbWrapper.db(), handle);
         }
         catch (RocksDBException e) {
             throw new IllegalStateException(e);

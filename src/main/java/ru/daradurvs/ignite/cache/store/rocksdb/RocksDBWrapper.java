@@ -16,9 +16,9 @@ import org.rocksdb.RocksDBException;
  * @since 30.10.2017
  */
 public class RocksDBWrapper implements AutoCloseable {
-    private static final Map<BytesArrayWrapper, ColumnFamilyHandle> COLUMN_FAMILY_HANDLES = new ConcurrentHashMap<>();
+    private final Map<BytesArrayWrapper, ColumnFamilyHandle> COLUMN_FAMILY_HANDLES = new ConcurrentHashMap<>();
 
-    private static RocksDB db;
+    private RocksDB db;
 
     static {
         RocksDB.loadLibrary();
@@ -62,7 +62,7 @@ public class RocksDBWrapper implements AutoCloseable {
         return db;
     }
 
-    public static ColumnFamilyHandle initColumnFamilyHandle(String cacheName) throws RocksDBException {
+    public ColumnFamilyHandle initColumnFamilyHandle(String cacheName) throws RocksDBException {
         byte[] name = cacheName.getBytes();
 
         BytesArrayWrapper key = new BytesArrayWrapper(name);
@@ -85,9 +85,9 @@ public class RocksDBWrapper implements AutoCloseable {
     @Override public void close() throws RocksDBException {
         if (db != null) {
             db.close();
-            COLUMN_FAMILY_HANDLES.clear();
-            db = null;
         }
+
+        COLUMN_FAMILY_HANDLES.clear();
     }
 
     private static class BytesArrayWrapper {
