@@ -8,6 +8,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 /**
  * @author Vyacheslav Daradur
@@ -43,6 +44,11 @@ public class SerializerImplTest {
         String sut = LINE;
 
         assertEquals(sut, serializeDeserialize(sut));
+    }
+
+    @Test
+    public void testNullSerialization() throws Exception {
+        assertNull(serializeDeserialize(null));
     }
 
     private Object serializeDeserialize(Object obj) {

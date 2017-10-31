@@ -25,6 +25,9 @@ public class KryoSerializer implements Serialiazer {
     }
 
     @Override public Object deserialize(byte[] bytes) {
+        if (bytes == null)
+            return null;
+
         try (Input in = new Input(bytes)) {
             return kryo.readClassAndObject(in);
         }

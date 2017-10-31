@@ -31,6 +31,9 @@ public class JavaSerializer implements Serialiazer {
     }
 
     @Override public Object deserialize(byte[] bytes) {
+        if (bytes == null)
+            return null;
+
         try (ObjectInputStream in = new ObjectInputStream(new ByteArrayInputStream(bytes))) {
             return in.readObject();
         }
