@@ -2,6 +2,8 @@ package ru.daradurvs.ignite.cache.store.rocksdb;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import org.rocksdb.FlushOptions;
+import org.rocksdb.RocksDB;
 import org.rocksdb.RocksDBException;
 
 /**
@@ -25,7 +27,9 @@ public class DBManager {
 
     public static void closeAll() throws RocksDBException {
         for (Map.Entry<String, RocksDBWrapper> entry : DB_INSTANCES.entrySet()) {
-            entry.getValue().close();
+            RocksDB db = entry.getValue().db();
+            db.flush(new FlushOptions().setWaitForFlush(true));
+            db.close();
         }
 
         DB_INSTANCES.clear();

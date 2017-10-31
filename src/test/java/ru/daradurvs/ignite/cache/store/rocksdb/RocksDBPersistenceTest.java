@@ -35,26 +35,38 @@ public class RocksDBPersistenceTest {
 
     @Test
     public void testRocksDBPersistence() throws Exception {
-        IgniteConfiguration cfg = new IgniteConfiguration();
-
+        final int entries = 100_000;
         final String cacheName = "testCacheName";
         final String prefix = "test";
 
-        try (Ignite ignite = Ignition.start(cfg)) {
-            IgniteCache<Integer, String> cache = ignite.getOrCreateCache(getCacheConfiguration(cacheName, ignite.configuration()));
+        IgniteConfiguration cfg = getIgniteConfiguration("0");
+        cfg.setCacheConfiguration(getCacheConfiguration(cacheName, cfg));
 
-            for (int i = 0; i < 100_000; i++) {
-                cache.put(i, prefix + i); // put with persistence
+        try (Ignite ignite = Ignition.start(cfg)) {
+            IgniteCache<Integer, String> cache = ignite.getOrCreateCache(cacheName);
+
+            for (int i = 0; i < entries; i++) {
+                cache.put(i, prefix + i); // write through
             }
         }
 
-        try (Ignite ignite = Ignition.start(cfg)) {
-            IgniteCache<Integer, String> cache = ignite.getOrCreateCache(getCacheConfiguration(cacheName, ignite.configuration()));
+        cfg = getIgniteConfiguration("1");
+        cfg.setCacheConfiguration(getCacheConfiguration(cacheName, cfg));
 
-            for (int i = 0; i < 100_000; i++) {
-                assertEquals(prefix + i, cache.get(i)); // get from persistence
+        try (Ignite ignite = Ignition.start(cfg)) {
+            IgniteCache<Integer, String> cache = ignite.getOrCreateCache(cacheName);
+
+            for (int i = 0; i < entries; i++) {
+                assertEquals(prefix + i, cache.get(i)); // read through
             }
         }
+    }
+
+    private IgniteConfiguration getIgniteConfiguration(String instanceName) {
+        IgniteConfiguration cfg = new IgniteConfiguration();
+        cfg.setIgniteInstanceName(instanceName);
+
+        return cfg;
     }
 
     private CacheConfiguration<Integer, String> getCacheConfiguration(String cacheName, IgniteConfiguration cfg)

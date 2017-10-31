@@ -5,8 +5,11 @@ import javax.cache.integration.CacheLoaderException;
 import javax.cache.integration.CacheWriterException;
 import org.apache.ignite.cache.store.CacheStoreAdapter;
 import org.rocksdb.ColumnFamilyHandle;
+import org.rocksdb.ReadOptions;
+import org.rocksdb.ReadTier;
 import org.rocksdb.RocksDB;
 import org.rocksdb.RocksDBException;
+import org.rocksdb.WriteOptions;
 import ru.daradurvs.ignite.cache.store.rocksdb.serializer.JavaSerializer;
 import ru.daradurvs.ignite.cache.store.rocksdb.serializer.Serialiazer;
 
@@ -17,18 +20,25 @@ import ru.daradurvs.ignite.cache.store.rocksdb.serializer.Serialiazer;
 public class RocksDBCacheStore<K, V> extends CacheStoreAdapter<K, V> {
     private final RocksDB db;
     private final ColumnFamilyHandle handle;
+    private final WriteOptions writeOptions;
     private final Serialiazer serializer;
 
     public RocksDBCacheStore(RocksDB db, ColumnFamilyHandle handle) {
         this.db = db;
         this.handle = handle;
+        this.writeOptions = new WriteOptions()/*.setSync(true)*/;
         this.serializer = new JavaSerializer();
     }
 
     @SuppressWarnings("unchecked")
     @Override public V load(K key) throws CacheLoaderException {
         try {
-            return (V)serializer.deserialize(db.get(handle, serializer.serialize(key)));
+            byte[] arr = db.get(handle, serializer.serialize(key));
+
+            if (arr == null)
+                return null;
+
+            return (V)serializer.deserialize(arr);
         }
         catch (RocksDBException e) {
             throw new CacheLoaderException("Couldn't load a value for the key: " + key, e);
@@ -38,6 +48,7 @@ public class RocksDBCacheStore<K, V> extends CacheStoreAdapter<K, V> {
     @Override public void write(Cache.Entry<? extends K, ? extends V> entry) throws CacheWriterException {
         try {
             db.put(handle,
+                writeOptions,
                 serializer.serialize(entry.getKey()),
                 serializer.serialize(entry.getValue())
             );
