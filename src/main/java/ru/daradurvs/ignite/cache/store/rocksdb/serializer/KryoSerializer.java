@@ -3,6 +3,8 @@ package ru.daradurvs.ignite.cache.store.rocksdb.serializer;
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * @author Vyacheslav Daradur
@@ -13,7 +15,7 @@ public class KryoSerializer implements Serialiazer {
 
     private Kryo kryo = new Kryo();
 
-    @Override public byte[] serialize(Object obj) {
+    @Override public byte[] serialize(@Nullable Object obj) {
         if (obj == null)
             return null;
 
@@ -24,10 +26,7 @@ public class KryoSerializer implements Serialiazer {
         }
     }
 
-    @Override public Object deserialize(byte[] bytes) {
-        if (bytes == null)
-            return null;
-
+    @Override public Object deserialize(@NotNull byte[] bytes) {
         try (Input in = new Input(bytes)) {
             return kryo.readClassAndObject(in);
         }

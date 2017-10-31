@@ -24,7 +24,7 @@ public class SerializerImplTest {
         this.serializer = serializer;
     }
 
-    @Parameterized.Parameters (name = "{0}")
+    @Parameterized.Parameters(name = "{0}")
     public static Collection<Serialiazer> instancesToTest() {
         return Arrays.<Serialiazer>asList(
             new JavaSerializer(),
@@ -54,6 +54,9 @@ public class SerializerImplTest {
     private Object serializeDeserialize(Object obj) {
         byte[] arr = serializer.serialize(obj);
 
+        if (arr == null)
+            return null;
+
         return serializer.deserialize(arr);
     }
 
@@ -69,9 +72,7 @@ public class SerializerImplTest {
 
             TestObject object = (TestObject)o;
 
-            if (i != object.i)
-                return false;
-            return s.equals(object.s);
+            return i == object.i && s.equals(object.s);
         }
 
         @Override public int hashCode() {
