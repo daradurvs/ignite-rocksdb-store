@@ -23,29 +23,32 @@ public class SerializerImplTest {
         this.serializer = serializer;
     }
 
-    @Parameterized.Parameters
+    @Parameterized.Parameters (name = "{0}")
     public static Collection<Serialiazer> instancesToTest() {
         return Arrays.<Serialiazer>asList(
-            new JavaSerializer()
+            new JavaSerializer(),
+            new KryoSerializer()
         );
     }
 
     @Test
-    public void serialize() throws Exception {
+    public void testCustomObjectSerialization() throws Exception {
         TestObject sut = new TestObject();
 
-        byte[] arr = serializer.serialize(sut);
-
-        assertEquals(sut, serializer.deserialize(arr));
+        assertEquals(sut, serializeDeserialize(sut));
     }
 
     @Test
-    public void deserialize() throws Exception {
+    public void testStringSerialization() throws Exception {
         String sut = LINE;
 
-        byte[] arr = serializer.serialize(sut);
+        assertEquals(sut, serializeDeserialize(sut));
+    }
 
-        assertEquals(sut, serializer.deserialize(arr));
+    private Object serializeDeserialize(Object obj) {
+        byte[] arr = serializer.serialize(obj);
+
+        return serializer.deserialize(arr);
     }
 
     private static class TestObject implements Serializable {

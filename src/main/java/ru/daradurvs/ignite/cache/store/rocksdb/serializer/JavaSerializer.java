@@ -38,4 +38,8 @@ public class JavaSerializer implements Serialiazer {
             throw new IllegalArgumentException("Couldn't deserialize bytes array: " + Arrays.toString(bytes), e);
         }
     }
+
+    @Override public String toString() {
+        return this.getClass().getSimpleName();
+    }
 }
