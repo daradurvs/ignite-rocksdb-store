@@ -3,16 +3,11 @@ package ru.daradurvs.ignite.cache.store.rocksdb;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
 import org.apache.ignite.Ignite;
 import org.apache.ignite.IgniteCache;
 import org.apache.ignite.Ignition;
 import org.apache.ignite.cache.CacheMode;
 import org.apache.ignite.cache.CacheWriteSynchronizationMode;
-import org.apache.ignite.cache.affinity.AffinityFunction;
-import org.apache.ignite.cache.affinity.AffinityFunctionContext;
-import org.apache.ignite.cluster.ClusterNode;
 import org.apache.ignite.configuration.CacheConfiguration;
 import org.apache.ignite.configuration.IgniteConfiguration;
 import org.apache.ignite.internal.util.IgniteUtils;
@@ -63,6 +58,7 @@ public class PartitionedCachePersistenceTest {
         }
 
         try (Ignite ignite = startIgniteCluster("0", "1", "2")) {
+
             IgniteCache<Integer, String> cache = ignite.getOrCreateCache(TEST_CACHE_NAME);
 
             assertEquals(3, ignite.cluster().nodes().size());
@@ -103,12 +99,13 @@ public class PartitionedCachePersistenceTest {
 
     private CacheConfiguration<Integer, String> getCacheConfiguration(IgniteConfiguration cfg) throws Exception {
         CacheConfiguration<Integer, String> cacheCfg = new CacheConfiguration<>();
-        cacheCfg.setCacheMode(CacheMode.REPLICATED);
+        cacheCfg.setCacheMode(CacheMode.PARTITIONED);
         cacheCfg.setWriteSynchronizationMode(CacheWriteSynchronizationMode.FULL_SYNC);
         cacheCfg.setBackups(0);
         cacheCfg.setName(TEST_CACHE_NAME);
         cacheCfg.setWriteThrough(true);
         cacheCfg.setReadThrough(true);
+        cacheCfg.setAffinity(new TestAffinityFunction());
 
         Path path = Paths.get(tempPath.toString(), cfg.getIgniteInstanceName());
 
