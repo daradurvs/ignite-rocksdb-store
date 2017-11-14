@@ -4,7 +4,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
 import org.apache.ignite.Ignite;
-import org.apache.ignite.IgniteCache;
 import org.apache.ignite.Ignition;
 import org.apache.ignite.cache.CacheMode;
 import org.apache.ignite.cache.CacheRebalanceMode;
@@ -17,62 +16,22 @@ import org.apache.ignite.spi.discovery.tcp.TcpDiscoverySpi;
 import org.apache.ignite.spi.discovery.tcp.ipfinder.vm.TcpDiscoveryVmIpFinder;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+public abstract class RocksDBPersistenceAbstractTest {
+    protected static final String TEST_CACHE_NAME = "testCacheName";
 
-/**
- * @author Vyacheslav Daradur
- * @since 23.10.2017
- */
-public class PartitionedCachePersistenceTest {
-    private static final String TEST_CACHE_NAME = "testCacheName";
-
-    private Path tempPath;
+    protected Path tempPath;
 
     @Before
     public void init() {
-        tempPath = Paths.get(System.getProperty("java.io.tmpdir"), (PartitionedCachePersistenceTest.class.getSimpleName() + "_" + System.currentTimeMillis()));
+        tempPath = Paths.get(System.getProperty("java.io.tmpdir"), (this.getClass().getSimpleName() + "_" + System.currentTimeMillis()));
     }
 
     @After
     public void clear() {
         IgniteUtils.delete(tempPath.toFile());
-    }
 
-    @Test
-    public void testPartitionedCachePersistence() throws Exception {
-        final int entries = 10_000;
-        final String prefix = "test";
-
-        try {
-            Ignite ignite = startIgniteCluster(nodesCount());
-
-            assertEquals(nodesCount(), ignite.cluster().nodes().size());
-
-            IgniteCache<Integer, String> cache = ignite.getOrCreateCache(TEST_CACHE_NAME);
-
-            for (int i = 0; i < entries; i++) {
-                cache.put(i, prefix + i); // write through
-            }
-        }
-        finally {
-            Ignition.stopAll(false);
-        }
-
-        try (Ignite ignite = startIgniteCluster(nodesCount())) {
-
-            IgniteCache<Integer, String> cache = ignite.getOrCreateCache(TEST_CACHE_NAME);
-
-            assertEquals(nodesCount(), ignite.cluster().nodes().size());
-
-            for (int i = 0; i < entries; i++) {
-                assertEquals(prefix + i, cache.get(i)); // read through
-            }
-        }
-        finally {
-            Ignition.stopAll(false);
-        }
+        Ignition.stopAll(true);
     }
 
     protected Ignite startIgniteCluster(int count) throws Exception {
@@ -88,12 +47,12 @@ public class PartitionedCachePersistenceTest {
     }
 
     protected Ignite startIgniteCluster(String name) throws Exception {
-        IgniteConfiguration cfg = getIgniteConfiguration(name);
+        IgniteConfiguration cfg = igniteConfiguration(name);
 
         return Ignition.start(cfg);
     }
 
-    protected IgniteConfiguration getIgniteConfiguration(String instanceName) throws Exception {
+    protected IgniteConfiguration igniteConfiguration(String instanceName) throws Exception {
         IgniteConfiguration cfg = new IgniteConfiguration();
         cfg.setIgniteInstanceName(instanceName);
 
@@ -106,16 +65,20 @@ public class PartitionedCachePersistenceTest {
         return cfg;
     }
 
-    protected CacheConfiguration<Integer, String> getCacheConfiguration(IgniteConfiguration cfg) throws Exception {
+    /**
+     * @param cfg Ignite configuration.
+     * @return Cache configuration.
+     */
+    protected CacheConfiguration<Integer, String> getCacheConfiguration(IgniteConfiguration cfg) {
         CacheConfiguration<Integer, String> cacheCfg = new CacheConfiguration<>();
-        cacheCfg.setCacheMode(CacheMode.PARTITIONED);
+        cacheCfg.setCacheMode(cacheMode());
         cacheCfg.setWriteSynchronizationMode(CacheWriteSynchronizationMode.FULL_SYNC);
         cacheCfg.setBackups(backups());
         cacheCfg.setName(TEST_CACHE_NAME);
         cacheCfg.setWriteThrough(true);
         cacheCfg.setReadThrough(true);
         cacheCfg.setAffinity(affinityFunction());
-        cacheCfg.setRebalanceMode(CacheRebalanceMode.NONE);
+        cacheCfg.setRebalanceMode(rebalanceMode());
 
         // Emulating separate machines which store data in independent stores.
         Path path = Paths.get(tempPath.toString(), cfg.getIgniteInstanceName());
@@ -129,10 +92,30 @@ public class PartitionedCachePersistenceTest {
         return cacheCfg;
     }
 
+    /**
+     * @return Cache mode.
+     */
+    protected CacheMode cacheMode() {
+        return CacheMode.REPLICATED;
+    }
+
+    /**
+     * @return Cache rebalance mode.
+     */
+    protected CacheRebalanceMode rebalanceMode() {
+        return CacheRebalanceMode.ASYNC;
+    }
+
+    /**
+     * @return Test affinity function.
+     */
     protected AffinityFunction affinityFunction() {
         return new TestAffinityFunction(partitions(), backups());
     }
 
+    /**
+     * @return Number of nodes.
+     */
     protected int nodesCount() {
         return 4;
     }
