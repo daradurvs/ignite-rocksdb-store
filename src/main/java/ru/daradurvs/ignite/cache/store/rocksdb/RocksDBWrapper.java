@@ -12,8 +12,7 @@ import org.rocksdb.RocksDB;
 import org.rocksdb.RocksDBException;
 
 /**
- * @author Vyacheslav Daradur
- * @since 30.10.2017
+ * Wrapper around RocksDB instance, provides some useful methods to work with.
  */
 public class RocksDBWrapper implements AutoCloseable {
     private final Map<BytesArrayWrapper, ColumnFamilyHandle> COLUMN_FAMILY_HANDLES = new ConcurrentHashMap<>();
@@ -24,10 +23,23 @@ public class RocksDBWrapper implements AutoCloseable {
         RocksDB.loadLibrary();
     }
 
+    /**
+     * Initialize wrapper around RocksDB database with given path.
+     *
+     * @param pathToDB Path to database.
+     * @throws RocksDBException In case of an error.
+     */
     RocksDBWrapper(String pathToDB) throws RocksDBException {
         db = open(pathToDB);
     }
 
+    /**
+     * Opens connection to RocksDB database with given path if exists, otherwise create new database.
+     *
+     * @param pathToDB Path to database.
+     * @return RocksDB instance.
+     * @throws RocksDBException In case of an error.
+     */
     protected RocksDB open(String pathToDB) throws RocksDBException {
         Options options = new Options().setCreateIfMissing(true);
 
@@ -62,7 +74,15 @@ public class RocksDBWrapper implements AutoCloseable {
         return db;
     }
 
-    public ColumnFamilyHandle initColumnFamilyHandle(String cacheName) throws RocksDBException {
+    /**
+     * Returns {@link ColumnFamilyHandle} which mapped to given Ignite cache name if exists, otherwise create new column
+     * family which will be used as an isolated namespace for keys of Ignite cache with given name.
+     *
+     * @param cacheName Ignite cache name.
+     * @return ColumnFamilyHandle mapped to given Ignite cache name.
+     * @throws RocksDBException In case of an error.
+     */
+    public ColumnFamilyHandle handle(String cacheName) throws RocksDBException {
         byte[] name = cacheName.getBytes();
 
         BytesArrayWrapper key = new BytesArrayWrapper(name);
@@ -78,10 +98,20 @@ public class RocksDBWrapper implements AutoCloseable {
         return handle;
     }
 
+    /**
+     * Returns {@link RocksDB} instance.
+     *
+     * @return RocksDB instance.
+     */
     public RocksDB db() {
         return db;
     }
 
+    /**
+     * Close connection to db.
+     *
+     * @throws RocksDBException In case of an error.
+     */
     @Override public void close() throws RocksDBException {
         if (db != null) {
             db.close();

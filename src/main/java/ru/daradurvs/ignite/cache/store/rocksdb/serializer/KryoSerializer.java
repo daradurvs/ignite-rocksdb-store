@@ -7,14 +7,14 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * @author Vyacheslav Daradur
- * @since 31.10.2017
+ * Serializer implementation using Kryo.
  */
 public class KryoSerializer implements Serialiazer {
     private static final int BUFFER_SIZE = 4096;
 
     private Kryo kryo = new Kryo();
 
+    /** {@inheritDoc} */
     @Override public byte[] serialize(@Nullable Object obj) {
         if (obj == null)
             return null;
@@ -26,12 +26,14 @@ public class KryoSerializer implements Serialiazer {
         }
     }
 
+    /** {@inheritDoc} */
     @Override public Object deserialize(@NotNull byte[] bytes) {
         try (Input in = new Input(bytes)) {
             return kryo.readClassAndObject(in);
         }
     }
 
+    /** {@inheritDoc} */
     @Override public String toString() {
         return this.getClass().getSimpleName();
     }

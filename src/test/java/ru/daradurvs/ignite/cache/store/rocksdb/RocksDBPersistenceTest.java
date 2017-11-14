@@ -9,8 +9,7 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 
 /**
- * @author Vyacheslav Daradur
- * @since 23.10.2017
+ * Tests enabled RocksDB persistence.
  */
 public class RocksDBPersistenceTest extends RocksDBPersistenceAbstractTest {
     @Test

@@ -14,8 +14,7 @@ import org.junit.runners.Parameterized;
 import static org.junit.Assert.assertEquals;
 
 /**
- * @author Vyacheslav Daradur
- * @since 23.10.2017
+ * Tests Ignite partitioned cache with enabled RocksDB persistence.
  */
 @RunWith(Parameterized.class)
 public class PartitionedCacheRocksDBPersistenceTest extends RocksDBPersistenceAbstractTest {

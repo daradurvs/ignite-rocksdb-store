@@ -17,6 +17,9 @@ import org.apache.ignite.spi.discovery.tcp.ipfinder.vm.TcpDiscoveryVmIpFinder;
 import org.junit.After;
 import org.junit.Before;
 
+/**
+ * Provides useful methods for testing Ignite cache with enabled RocksDB persistence.
+ */
 public abstract class RocksDBPersistenceAbstractTest {
     protected static final String TEST_CACHE_NAME = "testCacheName";
 
@@ -34,6 +37,13 @@ public abstract class RocksDBPersistenceAbstractTest {
         Ignition.stopAll(true);
     }
 
+    /**
+     * Starts number Ignite nodes.
+     *
+     * @param count Nodes number.
+     * @return First started node.
+     * @throws Exception In case of an error.
+     */
     protected Ignite startIgniteCluster(int count) throws Exception {
         assert count > 0;
 
@@ -46,12 +56,24 @@ public abstract class RocksDBPersistenceAbstractTest {
         return node;
     }
 
+    /**
+     * Starts Ignite node with given name.
+     *
+     * @param name Ignite instance name.
+     * @return Started ignite node.
+     * @throws Exception In case of an error.
+     */
     protected Ignite startIgniteCluster(String name) throws Exception {
         IgniteConfiguration cfg = igniteConfiguration(name);
 
         return Ignition.start(cfg);
     }
 
+    /**
+     * @param instanceName Ignite instance name.
+     * @return Ignite configuration.
+     * @throws Exception In case of an error.
+     */
     protected IgniteConfiguration igniteConfiguration(String instanceName) throws Exception {
         IgniteConfiguration cfg = new IgniteConfiguration();
         cfg.setIgniteInstanceName(instanceName);
@@ -72,7 +94,7 @@ public abstract class RocksDBPersistenceAbstractTest {
     protected CacheConfiguration<Integer, String> getCacheConfiguration(IgniteConfiguration cfg) {
         CacheConfiguration<Integer, String> cacheCfg = new CacheConfiguration<>();
         cacheCfg.setCacheMode(cacheMode());
-        cacheCfg.setWriteSynchronizationMode(CacheWriteSynchronizationMode.FULL_SYNC);
+        cacheCfg.setWriteSynchronizationMode(cacheWriteSynchronizationMode());
         cacheCfg.setBackups(backups());
         cacheCfg.setName(TEST_CACHE_NAME);
         cacheCfg.setWriteThrough(true);
@@ -104,6 +126,13 @@ public abstract class RocksDBPersistenceAbstractTest {
      */
     protected CacheRebalanceMode rebalanceMode() {
         return CacheRebalanceMode.ASYNC;
+    }
+
+    /**
+     * @return Cache write synchronization mode.
+     */
+    protected CacheWriteSynchronizationMode cacheWriteSynchronizationMode() {
+        return CacheWriteSynchronizationMode.PRIMARY_SYNC;
     }
 
     /**

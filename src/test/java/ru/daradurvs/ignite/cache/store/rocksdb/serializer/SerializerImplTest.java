@@ -11,8 +11,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
 /**
- * @author Vyacheslav Daradur
- * @since 25.10.2017
+ * Tests implementations of {@link Serialiazer} interface.
  */
 @RunWith(Parameterized.class)
 public class SerializerImplTest {

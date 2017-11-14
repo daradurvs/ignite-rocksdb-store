@@ -4,37 +4,47 @@ import javax.cache.Cache;
 import javax.cache.integration.CacheLoaderException;
 import javax.cache.integration.CacheWriterException;
 import org.apache.ignite.cache.store.CacheStoreAdapter;
-import org.apache.ignite.configuration.IgniteConfiguration;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.rocksdb.ColumnFamilyHandle;
 import org.rocksdb.ReadOptions;
-import org.rocksdb.ReadTier;
 import org.rocksdb.RocksDB;
 import org.rocksdb.RocksDBException;
 import org.rocksdb.WriteOptions;
 import ru.daradurvs.ignite.cache.store.rocksdb.serializer.JavaSerializer;
 import ru.daradurvs.ignite.cache.store.rocksdb.serializer.Serialiazer;
 
-/**
- * @author Vyacheslav Daradur
- * @since 23.10.2017
- */
+/** {@inheritDoc} */
 public class RocksDBCacheStore<K, V> extends CacheStoreAdapter<K, V> {
     private final RocksDB db;
     private final ColumnFamilyHandle handle;
     private final WriteOptions writeOptions;
+    private final ReadOptions readOptions;
     private final Serialiazer serializer;
 
-    public RocksDBCacheStore(RocksDB db, ColumnFamilyHandle handle) {
-        this.db = db;
-        this.handle = handle;
-        this.writeOptions = new WriteOptions()/*.setSync(true)*/;
-        this.serializer = new JavaSerializer();
+    public RocksDBCacheStore(@NotNull RocksDB db, @NotNull ColumnFamilyHandle handle) {
+        this(db, handle, new WriteOptions(), new ReadOptions(), new JavaSerializer());
     }
 
+    public RocksDBCacheStore(@NotNull RocksDB db, @NotNull ColumnFamilyHandle handle,
+        @Nullable Serialiazer serialiazer) {
+        this(db, handle, new WriteOptions(), new ReadOptions(), serialiazer);
+    }
+
+    public RocksDBCacheStore(@NotNull RocksDB db, @NotNull ColumnFamilyHandle handle,
+        @NotNull WriteOptions writeOptions, @NotNull ReadOptions readOptions, @NotNull Serialiazer serializer) {
+        this.db = db;
+        this.handle = handle;
+        this.writeOptions = writeOptions;
+        this.readOptions = readOptions;
+        this.serializer = serializer;
+    }
+
+    /** {@inheritDoc} */
     @SuppressWarnings("unchecked")
     @Override public V load(K key) throws CacheLoaderException {
         try {
-            byte[] arr = db.get(handle, serializer.serialize(key));
+            byte[] arr = db.get(handle, readOptions, serializer.serialize(key));
 
             if (arr == null)
                 return null;
@@ -46,6 +56,7 @@ public class RocksDBCacheStore<K, V> extends CacheStoreAdapter<K, V> {
         }
     }
 
+    /** {@inheritDoc} */
     @Override public void write(Cache.Entry<? extends K, ? extends V> entry) throws CacheWriterException {
         try {
             db.put(handle,
@@ -55,13 +66,14 @@ public class RocksDBCacheStore<K, V> extends CacheStoreAdapter<K, V> {
             );
         }
         catch (RocksDBException e) {
-            throw new CacheWriterException("Couldn't put entry, key: " + entry.getKey() + "; value: " + entry.getValue(), e);
+            throw new CacheWriterException("Couldn't put entry, [key: " + entry.getKey() + "; value: " + entry.getValue() + "]", e);
         }
     }
 
+    /** {@inheritDoc} */
     @Override public void delete(Object key) throws CacheWriterException {
         try {
-            db.delete(handle, serializer.serialize(key));
+            db.delete(handle, writeOptions, serializer.serialize(key));
         }
         catch (RocksDBException e) {
             throw new CacheWriterException("Couldn't delete a value for the key: " + key, e);

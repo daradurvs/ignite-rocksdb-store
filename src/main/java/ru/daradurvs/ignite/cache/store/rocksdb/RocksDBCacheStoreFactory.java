@@ -1,6 +1,5 @@
 package ru.daradurvs.ignite.cache.store.rocksdb;
 
-import java.io.Serializable;
 import java.util.Arrays;
 import javax.cache.configuration.Factory;
 import org.apache.ignite.IgniteException;
@@ -12,11 +11,8 @@ import org.rocksdb.RocksDBException;
 
 import static org.apache.ignite.lifecycle.LifecycleEventType.AFTER_NODE_STOP;
 
-/**
- * @author Vyacheslav Daradur
- * @since 23.10.2017
- */
-public class RocksDBCacheStoreFactory<K, V> implements Factory<RocksDBCacheStore<K, V>>, Serializable {
+/** {@inheritDoc} */
+public class RocksDBCacheStoreFactory<K, V> implements Factory<RocksDBCacheStore<K, V>> {
     private static final long serialVersionUID = 0L;
 
     private String pathToDB;
@@ -28,6 +24,7 @@ public class RocksDBCacheStoreFactory<K, V> implements Factory<RocksDBCacheStore
 
         LifecycleBean[] beans = cfg.getLifecycleBeans();
 
+        // Registering destructor
         if (beans == null) {
             cfg.setLifecycleBeans(new DestructorLifecycleBean());
         }
@@ -54,7 +51,7 @@ public class RocksDBCacheStoreFactory<K, V> implements Factory<RocksDBCacheStore
     @Override public RocksDBCacheStore<K, V> create() {
         try {
             RocksDBWrapper dbWrapper = DBManager.db(pathToDB);
-            ColumnFamilyHandle handle = dbWrapper.initColumnFamilyHandle(cacheName);
+            ColumnFamilyHandle handle = dbWrapper.handle(cacheName);
 
             return new RocksDBCacheStore<>(dbWrapper.db(), handle);
         }
