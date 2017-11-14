@@ -75,7 +75,6 @@ public class RocksDBPersistenceTest {
         cacheCfg.setName(cacheName);
         cacheCfg.setWriteThrough(true);
         cacheCfg.setReadThrough(true);
-        cacheCfg.setAffinity(new TestAffinityFunction());
 
         RocksDBCacheStoreFactory<Integer, String> factory = new RocksDBCacheStoreFactory<>(tempPath.toString(), cacheName, cfg);
 

@@ -4,6 +4,7 @@ import javax.cache.Cache;
 import javax.cache.integration.CacheLoaderException;
 import javax.cache.integration.CacheWriterException;
 import org.apache.ignite.cache.store.CacheStoreAdapter;
+import org.apache.ignite.configuration.IgniteConfiguration;
 import org.rocksdb.ColumnFamilyHandle;
 import org.rocksdb.ReadOptions;
 import org.rocksdb.ReadTier;
