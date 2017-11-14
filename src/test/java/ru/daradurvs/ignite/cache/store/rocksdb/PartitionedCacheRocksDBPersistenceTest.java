@@ -29,6 +29,7 @@ public class PartitionedCacheRocksDBPersistenceTest extends RocksDBPersistenceAb
         this.nodesCount = nodesCount;
     }
 
+    /** {@inheritDoc} */
     @Override protected int nodesCount() {
         return nodesCount;
     }
@@ -53,7 +54,8 @@ public class PartitionedCacheRocksDBPersistenceTest extends RocksDBPersistenceAb
             Ignition.stopAll(false);
         }
 
-        try (Ignite ignite = startIgniteCluster(nodesCount())) {
+        try {
+            Ignite ignite = startIgniteCluster(nodesCount());
 
             IgniteCache<Integer, String> cache = ignite.getOrCreateCache(TEST_CACHE_NAME);
 
