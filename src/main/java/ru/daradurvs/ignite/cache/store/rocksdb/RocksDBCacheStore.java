@@ -5,7 +5,6 @@ import javax.cache.integration.CacheLoaderException;
 import javax.cache.integration.CacheWriterException;
 import org.apache.ignite.cache.store.CacheStoreAdapter;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.rocksdb.ColumnFamilyHandle;
 import org.rocksdb.ReadOptions;
 import org.rocksdb.RocksDB;
@@ -23,11 +22,11 @@ public class RocksDBCacheStore<K, V> extends CacheStoreAdapter<K, V> {
     private final Serialiazer serializer;
 
     public RocksDBCacheStore(@NotNull RocksDB db, @NotNull ColumnFamilyHandle handle) {
-        this(db, handle, new WriteOptions(), new ReadOptions(), new JavaSerializer());
+        this(db, handle, new JavaSerializer());
     }
 
     public RocksDBCacheStore(@NotNull RocksDB db, @NotNull ColumnFamilyHandle handle,
-        @Nullable Serialiazer serialiazer) {
+        @NotNull Serialiazer serialiazer) {
         this(db, handle, new WriteOptions(), new ReadOptions(), serialiazer);
     }
 
