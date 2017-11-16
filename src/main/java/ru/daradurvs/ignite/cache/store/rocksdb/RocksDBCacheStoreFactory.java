@@ -7,7 +7,9 @@ import org.apache.ignite.configuration.IgniteConfiguration;
 import org.apache.ignite.lifecycle.LifecycleBean;
 import org.apache.ignite.lifecycle.LifecycleEventType;
 import org.rocksdb.ColumnFamilyHandle;
+import org.rocksdb.ReadOptions;
 import org.rocksdb.RocksDBException;
+import org.rocksdb.WriteOptions;
 
 import static org.apache.ignite.lifecycle.LifecycleEventType.AFTER_NODE_STOP;
 
@@ -22,9 +24,12 @@ public class RocksDBCacheStoreFactory<K, V> implements Factory<RocksDBCacheStore
         this.pathToDB = pathToDB;
         this.cacheName = cacheName;
 
+        registerDestructor(cfg);
+    }
+
+    private void registerDestructor(IgniteConfiguration cfg) {
         LifecycleBean[] beans = cfg.getLifecycleBeans();
 
-        // Registering destructor
         if (beans == null) {
             cfg.setLifecycleBeans(new DestructorLifecycleBean());
         }
@@ -52,6 +57,10 @@ public class RocksDBCacheStoreFactory<K, V> implements Factory<RocksDBCacheStore
         try {
             RocksDBWrapper dbWrapper = DBManager.db(pathToDB);
             ColumnFamilyHandle handle = dbWrapper.handle(cacheName);
+
+            ReadOptions readOptions = new ReadOptions();
+
+            WriteOptions writeOptions = new WriteOptions();
 
             return new RocksDBCacheStore<>(dbWrapper.db(), handle);
         }
