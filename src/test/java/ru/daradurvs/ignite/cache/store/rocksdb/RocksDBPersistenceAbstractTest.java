@@ -16,6 +16,7 @@ import org.apache.ignite.spi.discovery.tcp.TcpDiscoverySpi;
 import org.apache.ignite.spi.discovery.tcp.ipfinder.vm.TcpDiscoveryVmIpFinder;
 import org.junit.After;
 import org.junit.Before;
+import ru.daradurvs.ignite.cache.store.rocksdb.options.RocksDBConfiguration;
 
 /**
  * Provides useful methods for testing Ignite cache with enabled RocksDB persistence.
@@ -107,7 +108,9 @@ public abstract class RocksDBPersistenceAbstractTest {
 
         assert tempPath.toFile().exists() || tempPath.toFile().mkdir();
 
-        RocksDBCacheStoreFactory<Integer, String> factory = new RocksDBCacheStoreFactory<>(path.toString(), TEST_CACHE_NAME, cfg);
+        RocksDBConfiguration rocksCfg = new RocksDBConfiguration(path.toString(), TEST_CACHE_NAME);
+
+        RocksDBCacheStoreFactory<Integer, String> factory = new RocksDBCacheStoreFactory<>(rocksCfg, cfg);
 
         cacheCfg.setCacheStoreFactory(factory);
 
@@ -161,5 +164,21 @@ public abstract class RocksDBPersistenceAbstractTest {
      */
     protected int backups() {
         return 1;
+    }
+
+    /**
+     * @return Rocks database configuration.
+     */
+    protected RocksDBConfiguration rocksDBConfiguration() {
+        return new RocksDBConfiguration(tempPath.toString(), TEST_CACHE_NAME);
+    }
+
+    /**
+     * @param path Path to DB.
+     * @param cacheName Cache name.
+     * @return Rocks database configuration.
+     */
+    protected RocksDBConfiguration rocksDBConfiguration(String path, String cacheName) {
+        return new RocksDBConfiguration(path, cacheName);
     }
 }

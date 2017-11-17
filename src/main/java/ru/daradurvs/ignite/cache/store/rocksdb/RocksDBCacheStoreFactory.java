@@ -7,9 +7,9 @@ import org.apache.ignite.configuration.IgniteConfiguration;
 import org.apache.ignite.lifecycle.LifecycleBean;
 import org.apache.ignite.lifecycle.LifecycleEventType;
 import org.rocksdb.ColumnFamilyHandle;
-import org.rocksdb.ReadOptions;
 import org.rocksdb.RocksDBException;
-import org.rocksdb.WriteOptions;
+import ru.daradurvs.ignite.cache.store.rocksdb.options.RocksDBConfiguration;
+import ru.daradurvs.ignite.cache.store.rocksdb.serializer.JavaSerializer;
 
 import static org.apache.ignite.lifecycle.LifecycleEventType.AFTER_NODE_STOP;
 
@@ -17,12 +17,10 @@ import static org.apache.ignite.lifecycle.LifecycleEventType.AFTER_NODE_STOP;
 public class RocksDBCacheStoreFactory<K, V> implements Factory<RocksDBCacheStore<K, V>> {
     private static final long serialVersionUID = 0L;
 
-    private String pathToDB;
-    private String cacheName;
+    private RocksDBConfiguration dbCfg;
 
-    public RocksDBCacheStoreFactory(String pathToDB, String cacheName, IgniteConfiguration cfg) {
-        this.pathToDB = pathToDB;
-        this.cacheName = cacheName;
+    public RocksDBCacheStoreFactory(RocksDBConfiguration dbCfg, IgniteConfiguration cfg) {
+        this.dbCfg = dbCfg;
 
         registerDestructor(cfg);
     }
@@ -55,16 +53,15 @@ public class RocksDBCacheStoreFactory<K, V> implements Factory<RocksDBCacheStore
     /** {@inheritDoc} */
     @Override public RocksDBCacheStore<K, V> create() {
         try {
-            RocksDBWrapper dbWrapper = DBManager.db(pathToDB);
-            ColumnFamilyHandle handle = dbWrapper.handle(cacheName);
+            RocksDBWrapper dbWrapper = DBManager.db(dbCfg.getPathToDB());
+            ColumnFamilyHandle handle = dbWrapper.handle(dbCfg.getCacheName());
 
-            ReadOptions readOptions = new ReadOptions();
-
-            WriteOptions writeOptions = new WriteOptions();
-
-            return new RocksDBCacheStore<>(dbWrapper.db(), handle);
+            return new RocksDBCacheStore<>(dbWrapper.db(), handle, dbCfg.getWriteOptions(), dbCfg.getReadOptions(), new JavaSerializer());
         }
-        catch (RocksDBException e) {
+        catch (
+            RocksDBException e)
+
+        {
             throw new IllegalStateException("Couldn't initialize RocksDB instance.", e);
         }
     }
