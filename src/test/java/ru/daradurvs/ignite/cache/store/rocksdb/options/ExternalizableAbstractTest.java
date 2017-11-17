@@ -1,4 +1,4 @@
-package ru.daradurvs.ignite.cache.store.rocksdb.common;
+package ru.daradurvs.ignite.cache.store.rocksdb.options;
 
 import com.sun.xml.internal.messaging.saaj.util.ByteOutputStream;
 import java.io.ByteArrayInputStream;

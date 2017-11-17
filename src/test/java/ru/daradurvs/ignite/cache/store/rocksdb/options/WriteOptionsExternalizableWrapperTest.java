@@ -1,4 +1,4 @@
-package ru.daradurvs.ignite.cache.store.rocksdb.common;
+package ru.daradurvs.ignite.cache.store.rocksdb.options;
 
 import org.junit.Test;
 import org.rocksdb.WriteOptions;
