@@ -1,4 +1,4 @@
-package ru.daradurvs.ignite.cache.store.rocksdb;
+package ru.daradurvs.ignite.cache.store.rocksdb.common;
 
 import java.util.ArrayList;
 import java.util.Comparator;

@@ -1,5 +1,7 @@
-package ru.daradurvs.ignite.cache.store.rocksdb;
+package ru.daradurvs.ignite.cache.store.rocksdb.common;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -7,6 +9,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import org.rocksdb.ColumnFamilyDescriptor;
 import org.rocksdb.ColumnFamilyHandle;
+import org.rocksdb.FlushOptions;
 import org.rocksdb.Options;
 import org.rocksdb.RocksDB;
 import org.rocksdb.RocksDBException;
@@ -15,8 +18,10 @@ import org.rocksdb.RocksDBException;
  * Wrapper around RocksDB instance, provides some useful methods to work with.
  */
 public class RocksDBWrapper implements AutoCloseable {
+    /** Key - Column family name; Value - Column family handle. */
     private final Map<BytesArrayWrapper, ColumnFamilyHandle> COLUMN_FAMILY_HANDLES = new ConcurrentHashMap<>();
 
+    private Path path;
     private RocksDB db;
 
     static {
@@ -26,11 +31,12 @@ public class RocksDBWrapper implements AutoCloseable {
     /**
      * Initialize wrapper around RocksDB database with given path.
      *
-     * @param pathToDB Path to database.
+     * @param path Path to database.
      * @throws RocksDBException In case of an error.
      */
-    RocksDBWrapper(String pathToDB) throws RocksDBException {
-        db = open(pathToDB);
+    RocksDBWrapper(String path) throws RocksDBException {
+        this.path = Paths.get(path);
+        this.db = open(path);
     }
 
     /**
@@ -108,25 +114,42 @@ public class RocksDBWrapper implements AutoCloseable {
     }
 
     /**
+     * Returns path to database of wrapped RocksDB instance.
+     *
+     * @return Path to database.
+     */
+    public Path getPath() {
+        return path;
+    }
+
+    /**
      * Close connection to db.
      *
      * @throws RocksDBException In case of an error.
      */
     @Override public void close() throws RocksDBException {
         if (db != null) {
+            db.flush(new FlushOptions().setWaitForFlush(true));
             db.close();
         }
 
         COLUMN_FAMILY_HANDLES.clear();
     }
 
+    /**
+     * Wrapper around bytes array, which intended using it as key in maps. Provides methods 'equal' and 'hashCode'.
+     */
     private static class BytesArrayWrapper {
         byte[] arr;
 
+        /**
+         * @param arr Bytes array.
+         */
         private BytesArrayWrapper(byte[] arr) {
             this.arr = arr;
         }
 
+        /** {@inheritDoc} */
         @Override public boolean equals(Object o) {
             if (this == o)
                 return true;
@@ -138,6 +161,7 @@ public class RocksDBWrapper implements AutoCloseable {
             return Arrays.equals(arr, wrapper.arr);
         }
 
+        /** {@inheritDoc} */
         @Override public int hashCode() {
             return Arrays.hashCode(arr);
         }

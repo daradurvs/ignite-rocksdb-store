@@ -4,11 +4,11 @@ import org.apache.ignite.cache.CacheMode;
 import ru.daradurvs.ignite.cache.store.rocksdb.common.CacheRocksDBPersistenceTest;
 
 /**
- * Tests Ignite partitioned cache with enabled RocksDB persistence.
+ * Tests Ignite replicated cache with enabled RocksDB persistence.
  */
-public class PartitionedCacheRocksDBPersistenceTest extends CacheRocksDBPersistenceTest {
+public class ReplicatedCacheRocksDBPersistenceTest extends CacheRocksDBPersistenceTest {
     /** {@inheritDoc} */
     @Override protected CacheMode cacheMode() {
-        return CacheMode.PARTITIONED;
+        return CacheMode.REPLICATED;
     }
 }

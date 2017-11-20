@@ -1,4 +1,4 @@
-package ru.daradurvs.ignite.cache.store.rocksdb;
+package ru.daradurvs.ignite.cache.store.rocksdb.common;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -16,6 +16,7 @@ import org.apache.ignite.spi.discovery.tcp.TcpDiscoverySpi;
 import org.apache.ignite.spi.discovery.tcp.ipfinder.vm.TcpDiscoveryVmIpFinder;
 import org.junit.After;
 import org.junit.Before;
+import ru.daradurvs.ignite.cache.store.rocksdb.RocksDBCacheStoreFactory;
 import ru.daradurvs.ignite.cache.store.rocksdb.options.RocksDBConfiguration;
 
 /**
@@ -102,6 +103,7 @@ public abstract class RocksDBPersistenceAbstractTest {
         cacheCfg.setReadThrough(true);
         cacheCfg.setAffinity(affinityFunction());
         cacheCfg.setRebalanceMode(rebalanceMode());
+        cacheCfg.setRebalanceDelay(rebalanceDelay());
 
         // Emulating separate machines which store data in independent stores.
         Path path = Paths.get(tempPath.toString(), cfg.getIgniteInstanceName());
@@ -129,6 +131,13 @@ public abstract class RocksDBPersistenceAbstractTest {
      */
     protected CacheRebalanceMode rebalanceMode() {
         return CacheRebalanceMode.ASYNC;
+    }
+
+    /**
+     * @return Rebalance delay.
+     */
+    protected long rebalanceDelay() {
+        return 10_000;
     }
 
     /**

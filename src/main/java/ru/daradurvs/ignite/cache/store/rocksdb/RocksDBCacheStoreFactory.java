@@ -2,20 +2,25 @@ package ru.daradurvs.ignite.cache.store.rocksdb;
 
 import java.util.Arrays;
 import javax.cache.configuration.Factory;
-import org.apache.ignite.IgniteException;
+import org.apache.ignite.Ignite;
 import org.apache.ignite.configuration.IgniteConfiguration;
 import org.apache.ignite.lifecycle.LifecycleBean;
-import org.apache.ignite.lifecycle.LifecycleEventType;
+import org.apache.ignite.resources.IgniteInstanceResource;
 import org.rocksdb.ColumnFamilyHandle;
 import org.rocksdb.RocksDBException;
+import ru.daradurvs.ignite.cache.store.rocksdb.common.RocksDBHolder;
+import ru.daradurvs.ignite.cache.store.rocksdb.common.DestructorLifecycleBean;
+import ru.daradurvs.ignite.cache.store.rocksdb.common.RocksDBWrapper;
 import ru.daradurvs.ignite.cache.store.rocksdb.options.RocksDBConfiguration;
 import ru.daradurvs.ignite.cache.store.rocksdb.serializer.JavaSerializer;
-
-import static org.apache.ignite.lifecycle.LifecycleEventType.AFTER_NODE_STOP;
 
 /** {@inheritDoc} */
 public class RocksDBCacheStoreFactory<K, V> implements Factory<RocksDBCacheStore<K, V>> {
     private static final long serialVersionUID = 0L;
+
+    /** Auto-inject Ignite instance. */
+    @IgniteInstanceResource
+    private transient Ignite ignite;
 
     private RocksDBConfiguration dbCfg;
 
@@ -53,7 +58,7 @@ public class RocksDBCacheStoreFactory<K, V> implements Factory<RocksDBCacheStore
     /** {@inheritDoc} */
     @Override public RocksDBCacheStore<K, V> create() {
         try {
-            RocksDBWrapper dbWrapper = DBManager.db(dbCfg.getPathToDB());
+            RocksDBWrapper dbWrapper = RocksDBHolder.db(ignite.name(), dbCfg.getPathToDB());
             ColumnFamilyHandle handle = dbWrapper.handle(dbCfg.getCacheName());
 
             return new RocksDBCacheStore<>(dbWrapper.db(), handle, dbCfg.getWriteOptions(), dbCfg.getReadOptions(), new JavaSerializer());
@@ -66,15 +71,4 @@ public class RocksDBCacheStoreFactory<K, V> implements Factory<RocksDBCacheStore
         }
     }
 
-    private static class DestructorLifecycleBean implements LifecycleBean {
-        @Override public void onLifecycleEvent(LifecycleEventType evt) throws IgniteException {
-            try {
-                if (evt == AFTER_NODE_STOP)
-                    DBManager.closeAll();
-            }
-            catch (RocksDBException e) {
-                throw new IgniteException("Couldn't close RocksDB instances connection.", e);
-            }
-        }
-    }
 }

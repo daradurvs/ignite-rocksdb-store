@@ -5,6 +5,7 @@ import org.apache.ignite.IgniteCache;
 import org.apache.ignite.configuration.CacheConfiguration;
 import org.apache.ignite.configuration.IgniteConfiguration;
 import org.junit.Test;
+import ru.daradurvs.ignite.cache.store.rocksdb.common.RocksDBPersistenceAbstractTest;
 import ru.daradurvs.ignite.cache.store.rocksdb.options.RocksDBConfiguration;
 
 import static org.junit.Assert.assertEquals;
