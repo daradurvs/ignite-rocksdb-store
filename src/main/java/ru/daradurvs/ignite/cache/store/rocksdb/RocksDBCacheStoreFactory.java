@@ -8,8 +8,8 @@ import org.apache.ignite.lifecycle.LifecycleBean;
 import org.apache.ignite.resources.IgniteInstanceResource;
 import org.rocksdb.ColumnFamilyHandle;
 import org.rocksdb.RocksDBException;
-import ru.daradurvs.ignite.cache.store.rocksdb.common.RocksDBHolder;
 import ru.daradurvs.ignite.cache.store.rocksdb.common.DestructorLifecycleBean;
+import ru.daradurvs.ignite.cache.store.rocksdb.common.RocksDBHolder;
 import ru.daradurvs.ignite.cache.store.rocksdb.common.RocksDBWrapper;
 import ru.daradurvs.ignite.cache.store.rocksdb.options.RocksDBConfiguration;
 import ru.daradurvs.ignite.cache.store.rocksdb.serializer.JavaSerializer;
@@ -63,12 +63,8 @@ public class RocksDBCacheStoreFactory<K, V> implements Factory<RocksDBCacheStore
 
             return new RocksDBCacheStore<>(dbWrapper.db(), handle, dbCfg.getWriteOptions(), dbCfg.getReadOptions(), new JavaSerializer());
         }
-        catch (
-            RocksDBException e)
-
-        {
+        catch (RocksDBException e) {
             throw new IllegalStateException("Couldn't initialize RocksDB instance.", e);
         }
     }
-
 }
