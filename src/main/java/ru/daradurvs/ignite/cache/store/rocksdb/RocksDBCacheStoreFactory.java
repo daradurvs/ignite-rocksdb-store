@@ -4,6 +4,7 @@ import java.util.Arrays;
 import javax.cache.configuration.Factory;
 import org.apache.ignite.Ignite;
 import org.apache.ignite.configuration.IgniteConfiguration;
+import org.apache.ignite.internal.IgniteKernal;
 import org.apache.ignite.lifecycle.LifecycleBean;
 import org.apache.ignite.resources.IgniteInstanceResource;
 import org.rocksdb.ColumnFamilyHandle;
@@ -11,6 +12,7 @@ import org.rocksdb.RocksDBException;
 import ru.daradurvs.ignite.cache.store.rocksdb.common.DestructorLifecycleBean;
 import ru.daradurvs.ignite.cache.store.rocksdb.common.RocksDBHolder;
 import ru.daradurvs.ignite.cache.store.rocksdb.common.RocksDBWrapper;
+import ru.daradurvs.ignite.cache.store.rocksdb.common.Utils;
 import ru.daradurvs.ignite.cache.store.rocksdb.options.RocksDBConfiguration;
 import ru.daradurvs.ignite.cache.store.rocksdb.serializer.JavaSerializer;
 
@@ -58,7 +60,7 @@ public class RocksDBCacheStoreFactory<K, V> implements Factory<RocksDBCacheStore
     /** {@inheritDoc} */
     @Override public RocksDBCacheStore<K, V> create() {
         try {
-            RocksDBWrapper dbWrapper = RocksDBHolder.db(ignite.name(), dbCfg.getPathToDB());
+            RocksDBWrapper dbWrapper = RocksDBHolder.db(Utils.getNodeId(ignite), dbCfg.getPathToDB());
             ColumnFamilyHandle handle = dbWrapper.handle(dbCfg.getCacheName());
 
             return new RocksDBCacheStore<>(dbWrapper.db(), handle, dbCfg.getWriteOptions(), dbCfg.getReadOptions(), new JavaSerializer());

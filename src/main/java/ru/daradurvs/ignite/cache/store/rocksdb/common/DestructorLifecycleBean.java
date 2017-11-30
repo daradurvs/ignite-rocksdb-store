@@ -21,7 +21,7 @@ public class DestructorLifecycleBean implements LifecycleBean {
     @Override public void onLifecycleEvent(LifecycleEventType evt) throws IgniteException {
         try {
             if (evt == AFTER_NODE_STOP)
-                RocksDBHolder.close(ignite.name());
+                RocksDBHolder.close(Utils.getNodeId(ignite));
         }
         catch (RocksDBException e) {
             throw new IgniteException("Couldn't close RocksDB instances connection.", e);
