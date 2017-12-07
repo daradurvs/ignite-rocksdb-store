@@ -14,6 +14,9 @@ public class RocksDBConfiguration implements Serializable {
     private WriteOptionsExternalizableWrapper writeOptions;
     private ReadOptionsExternalizableWrapper readOptions;
 
+    public RocksDBConfiguration() {
+    }
+
     public RocksDBConfiguration(@NotNull String pathToDB, @NotNull String cacheName) {
         this(pathToDB, cacheName, new Options().setCreateIfMissing(true));
     }
@@ -31,20 +34,40 @@ public class RocksDBConfiguration implements Serializable {
         this.readOptions = new ReadOptionsExternalizableWrapper(readOptions);
     }
 
+    public void setPathToDB(String pathToDB) {
+        this.pathToDB = pathToDB;
+    }
+
     public String getPathToDB() {
         return pathToDB;
+    }
+
+    public void setCacheName(String cacheName) {
+        this.cacheName = cacheName;
     }
 
     public String getCacheName() {
         return cacheName;
     }
 
+    public void setDbOptions(RocksDBOptionsExternalizableWrapper dbOptions) {
+        this.dbOptions = dbOptions;
+    }
+
     public Options getDbOptions() {
         return dbOptions.getOptions();
     }
 
+    public void setWriteOptions(WriteOptionsExternalizableWrapper writeOptions) {
+        this.writeOptions = writeOptions;
+    }
+
     public WriteOptions getWriteOptions() {
         return writeOptions.getWriteOptions();
+    }
+
+    public void setReadOptions(ReadOptionsExternalizableWrapper readOptions) {
+        this.readOptions = readOptions;
     }
 
     public ReadOptions getReadOptions() {

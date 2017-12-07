@@ -19,6 +19,10 @@ public class WriteOptionsExternalizableWrapper implements Externalizable {
         this.writeOptions = writeOptions;
     }
 
+    public void setWriteOptions(WriteOptions writeOptions) {
+        this.writeOptions = writeOptions;
+    }
+
     public WriteOptions getWriteOptions() {
         return writeOptions;
     }

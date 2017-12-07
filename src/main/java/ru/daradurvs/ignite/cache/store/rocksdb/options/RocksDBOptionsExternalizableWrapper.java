@@ -20,17 +20,23 @@ public class RocksDBOptionsExternalizableWrapper implements Externalizable {
         this.options = options;
     }
 
-    public Options getOptions() {
-        return options;
-    }
-
     @Override public void writeExternal(ObjectOutput out) throws IOException {
         out.writeBoolean(options.createIfMissing());
+        out.writeBoolean(options.useFsync());
     }
 
     @Override public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
         options = new Options();
 
         options.setCreateIfMissing(in.readBoolean());
+        options.setUseFsync(in.readBoolean());
+    }
+
+    public void setOptions(Options options) {
+        this.options = options;
+    }
+
+    public Options getOptions() {
+        return options;
     }
 }

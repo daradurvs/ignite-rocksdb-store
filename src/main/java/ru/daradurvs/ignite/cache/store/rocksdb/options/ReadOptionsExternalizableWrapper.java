@@ -20,10 +20,6 @@ public class ReadOptionsExternalizableWrapper implements Externalizable {
         this.readOptions = readOptions;
     }
 
-    public ReadOptions getReadOptions() {
-        return readOptions;
-    }
-
     @Override public void writeExternal(ObjectOutput out) throws IOException {
         out.writeLong(readOptions.readaheadSize());
         out.writeByte(readOptions.readTier().getValue());
@@ -52,5 +48,13 @@ public class ReadOptionsExternalizableWrapper implements Externalizable {
         readOptions.setTailing(in.readBoolean());
         readOptions.setTotalOrderSeek(in.readBoolean());
         readOptions.setVerifyChecksums(in.readBoolean());
+    }
+
+    public void setReadOptions(ReadOptions readOptions) {
+        this.readOptions = readOptions;
+    }
+
+    public ReadOptions getReadOptions() {
+        return readOptions;
     }
 }

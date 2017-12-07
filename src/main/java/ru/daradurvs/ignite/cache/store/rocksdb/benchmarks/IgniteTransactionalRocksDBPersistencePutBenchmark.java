@@ -3,14 +3,17 @@ package ru.daradurvs.ignite.cache.store.rocksdb.benchmarks;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import org.apache.ignite.IgniteCache;
+import org.apache.ignite.IgniteException;
 import org.apache.ignite.cache.CacheMode;
 import org.apache.ignite.cache.CacheRebalanceMode;
 import org.apache.ignite.cache.CacheWriteSynchronizationMode;
 import org.apache.ignite.configuration.CacheConfiguration;
 import org.apache.ignite.configuration.IgniteConfiguration;
+import org.apache.ignite.internal.IgniteComponentType;
+import org.apache.ignite.internal.util.spring.IgniteSpringHelper;
 import org.apache.ignite.internal.util.typedef.internal.U;
+import org.apache.ignite.resources.SpringApplicationContextResource;
 import org.apache.ignite.yardstick.cache.IgnitePutBenchmark;
-import org.yardstickframework.BenchmarkConfiguration;
 import ru.daradurvs.ignite.cache.store.rocksdb.RocksDBCacheStoreFactory;
 import ru.daradurvs.ignite.cache.store.rocksdb.common.Utils;
 import ru.daradurvs.ignite.cache.store.rocksdb.options.RocksDBConfiguration;
@@ -20,6 +23,10 @@ public class IgniteTransactionalRocksDBPersistencePutBenchmark extends IgnitePut
     protected static final String BENCHMARK_CACHE_NAME = "transactional-rocks";
 
     protected Path tempPath;
+
+    /** Auto-injected Spring ApplicationContext resource. */
+    @SpringApplicationContextResource
+    private Object appCtx;
 
     private boolean hasPrepared = false;
 
@@ -34,17 +41,13 @@ public class IgniteTransactionalRocksDBPersistencePutBenchmark extends IgnitePut
     /** Following logic shouldn't be moved to setUp method. */
     private void prepareCache() {
         if (tempPath == null)
-            tempPath = Paths.get(System.getProperty("java.io.tmpdir"), (getClass().getSimpleName() + "_" + System.currentTimeMillis()));
+            tempPath = Paths.get(ignite().configuration().getWorkDirectory(), (getClass().getSimpleName() + "_" + System.currentTimeMillis()));
 
         CacheConfiguration<Integer, Object> cacheCfg = getCacheConfiguration(ignite().configuration());
 
         ignite().createCache(cacheCfg);
 
         hasPrepared = true;
-    }
-
-    @Override public void setUp(BenchmarkConfiguration cfg) throws Exception {
-        super.setUp(cfg);
     }
 
     /** {@inheritDoc} */
@@ -54,6 +57,10 @@ public class IgniteTransactionalRocksDBPersistencePutBenchmark extends IgnitePut
         U.delete(tempPath.toFile());
     }
 
+    /**
+     * @param cfg Ignite configuration.
+     * @return Cache configuration with enabled persistence to RocksDB.
+     */
     protected CacheConfiguration<Integer, Object> getCacheConfiguration(IgniteConfiguration cfg) {
         CacheConfiguration<Integer, Object> cacheCfg = new CacheConfiguration<>();
         cacheCfg.setCacheMode(CacheMode.PARTITIONED);
@@ -71,12 +78,38 @@ public class IgniteTransactionalRocksDBPersistencePutBenchmark extends IgnitePut
         if (!tempPath.toFile().exists())
             tempPath.toFile().mkdir();
 
-        RocksDBConfiguration rocksCfg = new RocksDBConfiguration(path.toString(), BENCHMARK_CACHE_NAME);
+        RocksDBConfiguration rocksCfg = getRocksDBConfiguration(path);
 
         RocksDBCacheStoreFactory<Integer, Object> factory = new RocksDBCacheStoreFactory<>(rocksCfg, cfg);
 
         cacheCfg.setCacheStoreFactory(factory);
 
         return cacheCfg;
+    }
+
+    /**
+     * @param path Path to RocksDB.
+     * @return RocksDB configuration.
+     */
+    protected RocksDBConfiguration getRocksDBConfiguration(Path path) {
+        RocksDBConfiguration rocksCfg = (RocksDBConfiguration)loadRocksConfiguration();
+        rocksCfg.setCacheName(BENCHMARK_CACHE_NAME);
+        rocksCfg.setPathToDB(path.toString());
+
+        assert rocksCfg.getDbOptions() != null;
+        assert rocksCfg.getWriteOptions() != null;
+        assert rocksCfg.getReadOptions() != null;
+
+        return rocksCfg;
+    }
+
+    private Object loadRocksConfiguration() {
+        try {
+            IgniteSpringHelper spring = IgniteComponentType.SPRING.create(false);
+            return spring.loadBeanFromAppContext(appCtx, "rocksdb.cfg");
+        }
+        catch (Exception e) {
+            throw new IgniteException("Failed to load bean in application context [beanName=rocksdb.cfg, igniteConfig=" + appCtx + ']', e);
+        }
     }
 }
