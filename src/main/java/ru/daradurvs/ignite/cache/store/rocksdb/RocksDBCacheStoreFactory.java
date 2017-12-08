@@ -1,10 +1,11 @@
 package ru.daradurvs.ignite.cache.store.rocksdb;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import javax.cache.configuration.Factory;
 import org.apache.ignite.Ignite;
 import org.apache.ignite.configuration.IgniteConfiguration;
-import org.apache.ignite.internal.IgniteKernal;
 import org.apache.ignite.lifecycle.LifecycleBean;
 import org.apache.ignite.resources.IgniteInstanceResource;
 import org.rocksdb.ColumnFamilyHandle;
@@ -60,7 +61,12 @@ public class RocksDBCacheStoreFactory<K, V> implements Factory<RocksDBCacheStore
     /** {@inheritDoc} */
     @Override public RocksDBCacheStore<K, V> create() {
         try {
-            RocksDBWrapper dbWrapper = RocksDBHolder.db(Utils.getNodeId(ignite), dbCfg.getPathToDB());
+            Path path = Paths.get(dbCfg.getPathToDB(), dbCfg.getCacheName(), Utils.getNodeId(ignite).toString());
+
+            if (!path.toFile().exists())
+                path.toFile().mkdirs();
+
+            RocksDBWrapper dbWrapper = RocksDBHolder.db(Utils.getNodeId(ignite), path.toString());
             ColumnFamilyHandle handle = dbWrapper.handle(dbCfg.getCacheName());
 
             return new RocksDBCacheStore<>(dbWrapper.db(), handle, dbCfg.getWriteOptions(), dbCfg.getReadOptions(), new JavaSerializer());

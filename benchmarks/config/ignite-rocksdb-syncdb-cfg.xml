@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one or more
+  contributor license agreements.  See the NOTICE file distributed with
+  this work for additional information regarding copyright ownership.
+  The ASF licenses this file to You under the Apache License, Version 2.0
+  (the "License"); you may not use this file except in compliance with
+  the License.  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<!--
+    Ignite Spring configuration file to startup grid.
+-->
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
+	<import resource="ignite-rocksdb-cfg.xml"/>
+
+	<bean id="ignite.cfg" class="org.apache.ignite.configuration.IgniteConfiguration" parent="base-ignite.cfg">
+		<property name="cacheConfiguration">
+			<list>
+				<bean class="org.apache.ignite.configuration.CacheConfiguration" parent="transactional-rocksdb-cache.cfg">
+					<property name="cacheStoreFactory">
+						<bean class="ru.daradurvs.ignite.cache.store.rocksdb.RocksDBCacheStoreFactory">
+							<constructor-arg index="0" ref="fsync-rocksdb.cfg"/>
+							<constructor-arg index="1" ref="ignite.cfg"/>
+						</bean>
+					</property>
+				</bean>
+			</list>
+		</property>
+	</bean>
+
+	<bean id="fsync-rocksdb.cfg" class="ru.daradurvs.ignite.cache.store.rocksdb.options.RocksDBConfiguration" parent="rocksdb.cfg">
+		<property name="dbOptions">
+			<bean class="ru.daradurvs.ignite.cache.store.rocksdb.options.RocksDBOptionsExternalizableWrapper">
+				<property name="options">
+					<bean class="org.rocksdb.Options">
+						<property name="useFsync" value="true"/>
+					</bean>
+				</property>
+			</bean>
+		</property>
+	</bean>
+</beans>
