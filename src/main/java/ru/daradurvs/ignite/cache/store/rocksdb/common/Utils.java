@@ -4,7 +4,7 @@ import java.util.UUID;
 import org.apache.ignite.Ignite;
 
 public class Utils {
-    public static UUID getNodeId(Ignite ignite) {
-        return ignite.cluster().localNode().id();
+    public static String getConsistentId(Ignite ignite) {
+        return String.valueOf(ignite.cluster().localNode().consistentId());
     }
 }

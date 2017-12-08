@@ -61,12 +61,14 @@ public class RocksDBCacheStoreFactory<K, V> implements Factory<RocksDBCacheStore
     /** {@inheritDoc} */
     @Override public RocksDBCacheStore<K, V> create() {
         try {
-            Path path = Paths.get(dbCfg.getPathToDB(), dbCfg.getCacheName(), Utils.getNodeId(ignite).toString());
+            String consistentNodeId = Utils.getConsistentId(ignite);
+
+            Path path = Paths.get(dbCfg.getPathToDB(), dbCfg.getCacheName(), consistentNodeId);
 
             if (!path.toFile().exists())
                 path.toFile().mkdirs();
 
-            RocksDBWrapper dbWrapper = RocksDBHolder.db(Utils.getNodeId(ignite), path.toString());
+            RocksDBWrapper dbWrapper = RocksDBHolder.db(consistentNodeId, path.toString());
             ColumnFamilyHandle handle = dbWrapper.handle(dbCfg.getCacheName());
 
             return new RocksDBCacheStore<>(dbWrapper.db(), handle, dbCfg.getWriteOptions(), dbCfg.getReadOptions(), new JavaSerializer());

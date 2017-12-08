@@ -79,6 +79,7 @@ public abstract class RocksDBPersistenceAbstractTest {
     protected IgniteConfiguration igniteConfiguration(String instanceName) throws Exception {
         IgniteConfiguration cfg = new IgniteConfiguration();
         cfg.setIgniteInstanceName(instanceName);
+        cfg.setConsistentId(instanceName);
 
         cfg.setCacheConfiguration(getCacheConfiguration(cfg));
 
