@@ -61,6 +61,8 @@ public class RocksDBCacheStoreFactory<K, V> implements Factory<RocksDBCacheStore
     /** {@inheritDoc} */
     @Override public RocksDBCacheStore<K, V> create() {
         try {
+            validate(dbCfg);
+
             String consistentNodeId = Utils.getConsistentId(ignite);
 
             Path path = Paths.get(dbCfg.getPathToDB(), dbCfg.getCacheName(), consistentNodeId);
@@ -75,6 +77,35 @@ public class RocksDBCacheStoreFactory<K, V> implements Factory<RocksDBCacheStore
         }
         catch (RocksDBException e) {
             throw new IllegalStateException("Couldn't initialize RocksDB instance.", e);
+        }
+    }
+
+    /**
+     * Validates given RocksDB configuration.
+     *
+     * @param cfg RocksDB configuration.
+     */
+    private void validate(RocksDBConfiguration cfg) {
+        StringBuilder msgBldr = new StringBuilder();
+
+        if (cfg.getPathToDB() == null)
+            msgBldr.append("pathToDB; ");
+
+        if (cfg.getCacheName() == null)
+            msgBldr.append("cacheName; ");
+
+        if (cfg.getDbOptions() == null)
+            msgBldr.append("dbOptions; ");
+
+        if (cfg.getWriteOptions() == null)
+            msgBldr.append("writeOptions; ");
+
+        if (cfg.getReadOptions() == null)
+            msgBldr.append("readOptions; ");
+
+        if (msgBldr.length() != 0) {
+            throw new IllegalStateException(
+                "Following fields should be defined explicitly in RocksDBConfiguration: [ " + msgBldr + "]");
         }
     }
 }
