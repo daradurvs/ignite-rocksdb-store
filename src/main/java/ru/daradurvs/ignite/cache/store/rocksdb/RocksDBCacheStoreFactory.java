@@ -70,7 +70,7 @@ public class RocksDBCacheStoreFactory<K, V> implements Factory<RocksDBCacheStore
             if (!path.toFile().exists())
                 path.toFile().mkdirs();
 
-            RocksDBWrapper dbWrapper = RocksDBHolder.db(consistentNodeId, path.toString());
+            RocksDBWrapper dbWrapper = RocksDBHolder.db(consistentNodeId, path.toString(), dbCfg.getDbOptions());
             ColumnFamilyHandle handle = dbWrapper.handle(dbCfg.getCacheName());
 
             return new RocksDBCacheStore<>(dbWrapper.db(), handle, dbCfg.getWriteOptions(), dbCfg.getReadOptions(), new JavaSerializer());

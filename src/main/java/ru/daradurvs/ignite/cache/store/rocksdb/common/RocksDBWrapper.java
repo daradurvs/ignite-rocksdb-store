@@ -7,8 +7,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import org.apache.ignite.internal.util.typedef.X;
 import org.rocksdb.ColumnFamilyDescriptor;
 import org.rocksdb.ColumnFamilyHandle;
+import org.rocksdb.DBOptions;
 import org.rocksdb.FlushOptions;
 import org.rocksdb.Options;
 import org.rocksdb.RocksDB;
@@ -34,29 +36,24 @@ public class RocksDBWrapper implements AutoCloseable {
      * @param path Path to database.
      * @throws RocksDBException In case of an error.
      */
-    RocksDBWrapper(String path) throws RocksDBException {
+    RocksDBWrapper(String path, DBOptions dbOptions) throws RocksDBException {
         this.path = Paths.get(path);
-        this.db = open(path);
+        this.db = open(path, dbOptions);
     }
 
     /**
      * Opens connection to RocksDB database with given path if exists, otherwise create new database.
      *
      * @param pathToDB Path to database.
+     * @param dbOptions Database options.
      * @return RocksDB instance.
      * @throws RocksDBException In case of an error.
      */
-    protected RocksDB open(String pathToDB) throws RocksDBException {
-        Options options = new Options().setCreateIfMissing(true);
-
-        List<byte[]> columnFamilyNames = RocksDB.listColumnFamilies(options, pathToDB);
+    protected RocksDB open(String pathToDB, DBOptions dbOptions) throws RocksDBException {
+        List<byte[]> columnFamilyNames = getColumnFamilyNames(pathToDB);
 
         if (columnFamilyNames.isEmpty()) {
-            RocksDB db = RocksDB.open(options, pathToDB);
-
-            COLUMN_FAMILY_HANDLES.put(new BytesArrayWrapper(RocksDB.DEFAULT_COLUMN_FAMILY), db.getDefaultColumnFamily());
-
-            return db;
+            columnFamilyNames.add(RocksDB.DEFAULT_COLUMN_FAMILY);
         }
 
         List<ColumnFamilyDescriptor> descriptors = new ArrayList<>();
@@ -65,9 +62,11 @@ public class RocksDBWrapper implements AutoCloseable {
             descriptors.add(new ColumnFamilyDescriptor(name));
         }
 
-        List<ColumnFamilyHandle> handles = new ArrayList<>();
+        List<ColumnFamilyHandle> handles = new ArrayList<>(descriptors.size());
 
-        RocksDB db = RocksDB.open(pathToDB, descriptors, handles);
+        RocksDB db = RocksDB.open(dbOptions, pathToDB, descriptors, handles);
+
+        X.println("RocksDB[" + path + "] connection has been initialized.");
 
         assert descriptors.size() == handles.size();
 
@@ -78,6 +77,25 @@ public class RocksDBWrapper implements AutoCloseable {
         }
 
         return db;
+    }
+
+    /**
+     * Returns names of all available column families for a rocksdb database identified by path
+     *
+     * @param pathToDB Path to database.
+     * @return List containing the column family names
+     * @throws RocksDBException In case of an error.
+     */
+    protected List<byte[]> getColumnFamilyNames(String pathToDB) throws RocksDBException {
+        Options options = new Options();
+        options.setCreateIfMissing(true);
+
+        List<byte[]> names = RocksDB.listColumnFamilies(options, pathToDB);
+
+        if (names.isEmpty())
+            names = new ArrayList<>(); // To avoid UnsupportedOperationException
+
+        return names;
     }
 
     /**
@@ -131,6 +149,8 @@ public class RocksDBWrapper implements AutoCloseable {
         if (db != null) {
             db.flush(new FlushOptions().setWaitForFlush(true));
             db.close();
+
+            X.println("Connection to RocksDB[" + path + "] connection has been closed.");
         }
 
         COLUMN_FAMILY_HANDLES.clear();

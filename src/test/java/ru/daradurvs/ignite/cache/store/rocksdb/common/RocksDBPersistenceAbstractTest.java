@@ -11,7 +11,8 @@ import org.apache.ignite.cache.CacheWriteSynchronizationMode;
 import org.apache.ignite.cache.affinity.AffinityFunction;
 import org.apache.ignite.configuration.CacheConfiguration;
 import org.apache.ignite.configuration.IgniteConfiguration;
-import org.apache.ignite.internal.util.IgniteUtils;
+import org.apache.ignite.internal.util.typedef.X;
+import org.apache.ignite.internal.util.typedef.internal.U;
 import org.apache.ignite.spi.discovery.tcp.TcpDiscoverySpi;
 import org.apache.ignite.spi.discovery.tcp.ipfinder.vm.TcpDiscoveryVmIpFinder;
 import org.junit.After;
@@ -30,11 +31,13 @@ public abstract class RocksDBPersistenceAbstractTest {
     @Before
     public void init() {
         tempPath = Paths.get(System.getProperty("java.io.tmpdir"), (this.getClass().getSimpleName() + "_" + System.currentTimeMillis()));
+
+        X.println("[RocksDB] temp path: " + tempPath);
     }
 
     @After
     public void clear() {
-        IgniteUtils.delete(tempPath.toFile());
+        U.delete(tempPath.toFile());
 
         Ignition.stopAll(true);
     }

@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import org.jetbrains.annotations.NotNull;
+import org.rocksdb.DBOptions;
 import org.rocksdb.RocksDBException;
 
 /**
@@ -21,11 +22,12 @@ public class RocksDBHolder {
      *
      * @param consistentNodeId Ignite consistent node id.
      * @param pathToDB Path to database.
+     * @param dbOptions Database options.
      * @return Wrapper around RocksDB instance.
      * @throws RocksDBException In case of an error.
      */
     public static RocksDBWrapper db(@NotNull String consistentNodeId,
-        @NotNull String pathToDB) throws RocksDBException {
+        @NotNull String pathToDB, @NotNull DBOptions dbOptions) throws RocksDBException {
         List<RocksDBWrapper> dbInstances = ROCKS_DB_INSTANCES.get(consistentNodeId);
 
         Path path = Paths.get(pathToDB);
@@ -39,7 +41,8 @@ public class RocksDBHolder {
             dbInstances = new ArrayList<>(1);
         }
 
-        RocksDBWrapper db = new RocksDBWrapper(pathToDB);
+        RocksDBWrapper db = new RocksDBWrapper(pathToDB, dbOptions);
+
         dbInstances.add(db);
 
         ROCKS_DB_INSTANCES.put(consistentNodeId, dbInstances);

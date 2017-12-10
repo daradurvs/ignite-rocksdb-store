@@ -4,11 +4,11 @@ import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
-import org.rocksdb.Options;
+import org.rocksdb.DBOptions;
 
 // TODO: implement serialization properly
 public class RocksDBOptionsExternalizableWrapper implements Externalizable {
-    private transient Options options;
+    private transient DBOptions options;
 
     /**
      * For Externalizable interface support.
@@ -16,7 +16,7 @@ public class RocksDBOptionsExternalizableWrapper implements Externalizable {
     public RocksDBOptionsExternalizableWrapper() {
     }
 
-    public RocksDBOptionsExternalizableWrapper(Options options) {
+    public RocksDBOptionsExternalizableWrapper(DBOptions options) {
         this.options = options;
     }
 
@@ -26,17 +26,17 @@ public class RocksDBOptionsExternalizableWrapper implements Externalizable {
     }
 
     @Override public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
-        options = new Options();
+        options = new DBOptions();
 
         options.setCreateIfMissing(in.readBoolean());
         options.setUseFsync(in.readBoolean());
     }
 
-    public void setOptions(Options options) {
+    public void setOptions(DBOptions options) {
         this.options = options;
     }
 
-    public Options getOptions() {
+    public DBOptions getOptions() {
         return options;
     }
 }

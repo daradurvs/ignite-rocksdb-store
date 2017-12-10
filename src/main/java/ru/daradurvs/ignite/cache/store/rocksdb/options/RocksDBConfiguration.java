@@ -2,7 +2,7 @@ package ru.daradurvs.ignite.cache.store.rocksdb.options;
 
 import java.io.Serializable;
 import org.jetbrains.annotations.NotNull;
-import org.rocksdb.Options;
+import org.rocksdb.DBOptions;
 import org.rocksdb.ReadOptions;
 import org.rocksdb.WriteOptions;
 
@@ -18,15 +18,15 @@ public class RocksDBConfiguration implements Serializable {
     }
 
     public RocksDBConfiguration(@NotNull String pathToDB, @NotNull String cacheName) {
-        this(pathToDB, cacheName, new Options().setCreateIfMissing(true));
+        this(pathToDB, cacheName, new DBOptions().setCreateIfMissing(true));
     }
 
-    public RocksDBConfiguration(@NotNull String pathToDB, @NotNull String cacheName, @NotNull Options options) {
-        this(pathToDB, cacheName, options, new WriteOptions(), new ReadOptions());
+    public RocksDBConfiguration(@NotNull String pathToDB, @NotNull String cacheName, @NotNull DBOptions dbOptions) {
+        this(pathToDB, cacheName, dbOptions, new WriteOptions(), new ReadOptions());
     }
 
     public RocksDBConfiguration(@NotNull String pathToDB, @NotNull String cacheName,
-        @NotNull Options dbOptions, @NotNull WriteOptions writeOptions, @NotNull ReadOptions readOptions) {
+        @NotNull DBOptions dbOptions, @NotNull WriteOptions writeOptions, @NotNull ReadOptions readOptions) {
         this.pathToDB = pathToDB;
         this.cacheName = cacheName;
         this.dbOptions = new RocksDBOptionsExternalizableWrapper(dbOptions);
@@ -54,7 +54,7 @@ public class RocksDBConfiguration implements Serializable {
         this.dbOptions = dbOptions;
     }
 
-    public Options getDbOptions() {
+    public DBOptions getDbOptions() {
         return dbOptions.getOptions();
     }
 

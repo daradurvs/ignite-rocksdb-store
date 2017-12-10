@@ -7,7 +7,7 @@ import org.apache.ignite.lifecycle.LifecycleEventType;
 import org.apache.ignite.resources.IgniteInstanceResource;
 import org.rocksdb.RocksDBException;
 
-import static org.apache.ignite.lifecycle.LifecycleEventType.AFTER_NODE_STOP;
+import static org.apache.ignite.lifecycle.LifecycleEventType.BEFORE_NODE_STOP;
 
 /**
  * Responsible for closing connection to RocksDB instance after Ignite node stop.
@@ -20,7 +20,7 @@ public class DestructorLifecycleBean implements LifecycleBean {
     /** {@inheritDoc} */
     @Override public void onLifecycleEvent(LifecycleEventType evt) throws IgniteException {
         try {
-            if (evt == AFTER_NODE_STOP)
+            if (evt == BEFORE_NODE_STOP)
                 RocksDBHolder.close(Utils.getConsistentId(ignite));
         }
         catch (RocksDBException e) {
