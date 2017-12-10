@@ -32,6 +32,8 @@
 		<property name="localHost" value="127.0.0.1"/>
 
 		<property name="workDirectory" value="/mnt/c/TEMP/work"/>
+		
+		<property name="consistentId" value="#{ T(java.util.UUID).randomUUID().toString() }"/>
 
 		<property name="cacheConfiguration">
 			<list>
