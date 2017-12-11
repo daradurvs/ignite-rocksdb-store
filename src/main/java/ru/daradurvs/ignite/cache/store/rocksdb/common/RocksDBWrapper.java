@@ -66,7 +66,7 @@ public class RocksDBWrapper implements AutoCloseable {
 
         RocksDB db = RocksDB.open(dbOptions, pathToDB, descriptors, handles);
 
-        X.println("RocksDB[" + path + "] connection has been initialized.");
+        X.println("RocksDB connection has been initialized: " + path);
 
         assert descriptors.size() == handles.size();
 
@@ -150,7 +150,7 @@ public class RocksDBWrapper implements AutoCloseable {
             db.flush(new FlushOptions().setWaitForFlush(true));
             db.close();
 
-            X.println("Connection to RocksDB[" + path + "] connection has been closed.");
+            X.println("RocksDB connection has been closed: " + path);
         }
 
         COLUMN_FAMILY_HANDLES.clear();
