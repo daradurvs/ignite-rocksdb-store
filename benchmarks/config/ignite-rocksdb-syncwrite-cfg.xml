@@ -24,10 +24,10 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="
         http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
-	<import resource="ignite-rocksdb-cfg.xml"/>
+	<import resource="ignite-rocksdb-base-cfg.xml"/>
 
 	<bean id="ignite.cfg" class="org.apache.ignite.configuration.IgniteConfiguration" parent="base-ignite.cfg">
-		<property name="workDirectory" value="/mnt/c/TEMP/work/2"/>
+		<property name="workDirectory" value="/gridgain/ssd/vdaradur/work/rocks-sync"/>
 		
 		<property name="cacheConfiguration">
 			<list>
@@ -44,7 +44,7 @@
 	</bean>
 
 	<bean id="syncwrite-rocksdb.cfg" class="ru.daradurvs.ignite.cache.store.rocksdb.options.RocksDBConfiguration" parent="rocksdb.cfg">
-		<property name="pathToDB" value="/mnt/c/TEMP/work/2"/>
+		<property name="pathToDB" value="/gridgain/ssd/vdaradur/work/rocks-sync"/>
 		
 		<property name="writeOptions">
 			<bean class="ru.daradurvs.ignite.cache.store.rocksdb.options.WriteOptionsExternalizableWrapper">

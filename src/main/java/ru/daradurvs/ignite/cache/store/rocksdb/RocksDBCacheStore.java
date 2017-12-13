@@ -4,6 +4,7 @@ import javax.cache.Cache;
 import javax.cache.integration.CacheLoaderException;
 import javax.cache.integration.CacheWriterException;
 import org.apache.ignite.cache.store.CacheStoreAdapter;
+import org.apache.ignite.internal.processors.cache.store.CacheLocalStore;
 import org.jetbrains.annotations.NotNull;
 import org.rocksdb.ColumnFamilyHandle;
 import org.rocksdb.ReadOptions;
@@ -14,6 +15,7 @@ import ru.daradurvs.ignite.cache.store.rocksdb.serializer.JavaSerializer;
 import ru.daradurvs.ignite.cache.store.rocksdb.serializer.Serialiazer;
 
 /** {@inheritDoc} */
+@CacheLocalStore
 public class RocksDBCacheStore<K, V> extends CacheStoreAdapter<K, V> {
     private final RocksDB db;
     private final ColumnFamilyHandle handle;

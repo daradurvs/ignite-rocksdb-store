@@ -27,7 +27,7 @@
 	<import resource="ignite-localhost-base-cfg.xml"/>
 
 	<bean id="grid.cfg" class="org.apache.ignite.configuration.IgniteConfiguration" parent="base-ignite.cfg">
-		<property name="workDirectory" value="/mnt/c/TEMP/work/1"/>
+		<property name="workDirectory" value="/gridgain/ssd/vdaradur/work/pds-throt"/>
 	
 		<!-- Enabling Apache Ignite Persistent Store. -->
 		<property name="dataStorageConfiguration">

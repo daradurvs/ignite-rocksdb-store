@@ -26,15 +26,7 @@
         http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
 	<import resource="ignite-localhost-base-cfg.xml"/>
 
-	<bean id="ignite.cfg" class="org.apache.ignite.configuration.IgniteConfiguration" parent="base-ignite.cfg">
-		<property name="cacheConfiguration">
-			<list>
-				<ref bean="transactional-rocksdb-cache.cfg"/>
-			</list>
-		</property>
-	</bean>
-
-	<bean id="transactional-rocksdb-cache.cfg" class="org.apache.ignite.configuration.CacheConfiguration" parent="transactional-cache.cfg">
+	<bean id="transactional-rocksdb-cache.cfg" class="org.apache.ignite.configuration.CacheConfiguration" parent="transactional-cache.cfg" abstract="true">
 		<property name="writeThrough" value="true"/>
 		<property name="readThrough" value="true"/>
 		<property name="rebalanceDelay" value="10000"/>
@@ -47,13 +39,13 @@
 		</property>
 	</bean>
 
-	<bean id="rocksdb.cfg" class="ru.daradurvs.ignite.cache.store.rocksdb.options.RocksDBConfiguration">
+	<bean id="rocksdb.cfg" class="ru.daradurvs.ignite.cache.store.rocksdb.options.RocksDBConfiguration" abstract="true">
 		<property name="cacheName" value="transactional"/>
 		<property name="pathToDB" value="/mnt/c/TEMP/work/rocks"/>
 
 		<property name="dbOptions">
-			<bean class="ru.daradurvs.ignite.cache.store.rocksdb.options.RocksDBOptionsExternalizableWrapper">
-				<property name="options">
+			<bean class="ru.daradurvs.ignite.cache.store.rocksdb.options.DBOptionsExternalizableWrapper">
+				<property name="dbOptions">
 					<bean class="org.rocksdb.DBOptions">
 						<property name="createIfMissing" value="true"/>
 					</bean>

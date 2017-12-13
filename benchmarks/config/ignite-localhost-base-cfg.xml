@@ -29,9 +29,9 @@
 
 		<property name="metricsLogFrequency" value="5000"/>
 
-		<property name="localHost" value="127.0.0.1"/>
+		<!-- property name="localHost" value="127.0.0.1"/ -->
 
-		<property name="workDirectory" value="/mnt/c/TEMP/work"/>
+		<property name="workDirectory" value="/gridgain/ssd/vdaradur/work"/>
 		
 		<property name="consistentId" value="#{ T(java.util.UUID).randomUUID().toString() }"/>
 
@@ -41,26 +41,42 @@
 			</list>
 		</property>
 
-		<property name="dataStorageConfiguration">
-			<ref bean="base-storage.cfg"/>
-		</property>
-
+		<!-- property name="discoverySpi">
+			<bean class="org.apache.ignite.spi.discovery.tcp.TcpDiscoverySpi">
+				<property name="ipFinder">
+					<bean class="org.apache.ignite.spi.discovery.tcp.ipfinder.vm.TcpDiscoveryVmIpFinder">
+						<property name="addresses">
+							<list>
+								<value>127.0.0.1:47500..47509</value>
+							</list>
+						</property>
+					</bean>
+				</property>
+			</bean>
+		</property -->
+		
 		<property name="discoverySpi">
 			<bean class="org.apache.ignite.spi.discovery.tcp.TcpDiscoverySpi">
 				<property name="ipFinder">
 					<bean class="org.apache.ignite.spi.discovery.tcp.ipfinder.vm.TcpDiscoveryVmIpFinder">
 						<property name="addresses">
 							<list>
-								<value>127.0.0.1:47500</value>
-								<value>127.0.0.1:47501</value>
-								<value>127.0.0.1:47502</value>
-								<value>127.0.0.1:47503</value>
-								<value>127.0.0.1:47504</value>
-								<value>127.0.0.1:47505</value>
-								<value>127.0.0.1:47506</value>
-								<value>127.0.0.1:47507</value>
-								<value>127.0.0.1:47508</value>
-								<value>127.0.0.1:47509</value>
+								<value>grid597</value>
+								<value>grid598</value>
+								<value>grid599</value>
+								<value>grid600</value>
+								<value>grid601</value>
+								<value>grid602</value>
+								<value>grid603</value>
+								<value>grid604</value>
+								<value>grid605</value>
+								<value>grid606</value>
+								<value>grid607</value>
+								<value>grid608</value>
+								<value>grid609</value>
+								<value>grid610</value>
+								<value>grid611</value>
+								<value>grid612</value>
 							</list>
 						</property>
 					</bean>
@@ -68,11 +84,11 @@
 			</bean>
 		</property>
 
-		<property name="communicationSpi">
+		<!-- property name="communicationSpi">
 			<bean class="org.apache.ignite.spi.communication.tcp.TcpCommunicationSpi">
 				<property name="sharedMemoryPort" value="-1"/>
 			</bean>
-		</property>
+		</property -->
 
 		<property name="includeEventTypes">
 			<list/>
@@ -85,10 +101,11 @@
 		</property>
 	</bean>
 
-	<bean id="base-storage.cfg" class="org.apache.ignite.configuration.DataStorageConfiguration">
+	<bean id="base-storage.cfg" class="org.apache.ignite.configuration.DataStorageConfiguration" abstract="true">
 		<property name="defaultDataRegionConfiguration">
 			<bean class="org.apache.ignite.configuration.DataRegionConfiguration">
-				<property name="maxSize" value="#{1L * 1024 * 1024 * 1024}"/>
+				<property name="initialSize" value="#{100L * 1024 * 1024 * 1024}"/>
+				<property name="maxSize" value="#{500L * 1024 * 1024 * 1024}"/>
 			</bean>
 		</property>
 	</bean>

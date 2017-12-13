@@ -10,7 +10,7 @@ public class RocksDBConfiguration implements Serializable {
     private String pathToDB;
     private String cacheName;
 
-    private RocksDBOptionsExternalizableWrapper dbOptions;
+    private DBOptionsExternalizableWrapper dbOptions;
     private WriteOptionsExternalizableWrapper writeOptions;
     private ReadOptionsExternalizableWrapper readOptions;
 
@@ -29,7 +29,7 @@ public class RocksDBConfiguration implements Serializable {
         @NotNull DBOptions dbOptions, @NotNull WriteOptions writeOptions, @NotNull ReadOptions readOptions) {
         this.pathToDB = pathToDB;
         this.cacheName = cacheName;
-        this.dbOptions = new RocksDBOptionsExternalizableWrapper(dbOptions);
+        this.dbOptions = new DBOptionsExternalizableWrapper(dbOptions);
         this.writeOptions = new WriteOptionsExternalizableWrapper(writeOptions);
         this.readOptions = new ReadOptionsExternalizableWrapper(readOptions);
     }
@@ -50,12 +50,12 @@ public class RocksDBConfiguration implements Serializable {
         return cacheName;
     }
 
-    public void setDbOptions(RocksDBOptionsExternalizableWrapper dbOptions) {
+    public void setDbOptions(DBOptionsExternalizableWrapper dbOptions) {
         this.dbOptions = dbOptions;
     }
 
     public DBOptions getDbOptions() {
-        return dbOptions.getOptions();
+        return dbOptions.getDbOptions();
     }
 
     public void setWriteOptions(WriteOptionsExternalizableWrapper writeOptions) {

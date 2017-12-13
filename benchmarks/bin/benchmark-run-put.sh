@@ -26,7 +26,7 @@ MAIN_DIR=$(cd ${SCRIPT_DIR}/../; pwd)
 CONFIG_INCLUDE=$1
 
 if [ "${CONFIG_INCLUDE}" == "-h" ] || [ "${CONFIG_INCLUDE}" == "--help" ]; then
-    echo "Usage: benchmark-run-put.sh [PROPERTIES_FILE_PATH]"
+    echo "Usage: benchmark-run-all.sh [PROPERTIES_FILE_PATH]"
     echo "By default, all the necessary files will be automatically uploaded from this host"
     echo "to every other remote host to the same path."
     echo "If you prefer to do it manually set the AUTO_COPY variable in property file to `false`."
@@ -84,13 +84,15 @@ function define_ips()
 # Deleting all the yardstick directories from the working directory on remote host
 # $1 IP address of the remote host
 function clear_remote_work_directory()
-{
-    ssh -o StrictHostKeyChecking=no $1 rm -rf $MAIN_DIR/bin
-    ssh -o StrictHostKeyChecking=no $1 rm -rf $MAIN_DIR/config
-    ssh -o StrictHostKeyChecking=no $1 rm -rf $MAIN_DIR/libs
-    ssh -o StrictHostKeyChecking=no $1 rm -rf $MAIN_DIR/output
-    ssh -o StrictHostKeyChecking=no $1 rm -rf $MAIN_DIR/work
+{ 
+	echo 'skipping clear_remote_work_directory'
 }
+#    ssh -o StrictHostKeyChecking=no $1 rm -rf $MAIN_DIR/bin
+#    ssh -o StrictHostKeyChecking=no $1 rm -rf $MAIN_DIR/config
+#    ssh -o StrictHostKeyChecking=no $1 rm -rf $MAIN_DIR/libs
+#    ssh -o StrictHostKeyChecking=no $1 rm -rf $MAIN_DIR/output
+#    ssh -o StrictHostKeyChecking=no $1 rm -rf $MAIN_DIR/work
+
 
 # Copying working directory to remote hosts.
 function copy_to_hosts()
@@ -109,7 +111,8 @@ function copy_to_hosts()
 }
 
 if [[ $AUTO_COPY != false ]]; then
-    copy_to_hosts
+#    copy_to_hosts
+	echo 'skipping copy_to_hosts'
 fi
 
 date_time=$(date +"%Y%m%d-%H%M%S")
