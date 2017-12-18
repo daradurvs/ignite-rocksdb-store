@@ -1,5 +1,6 @@
 package ru.daradurvs.ignite.cache.store.rocksdb;
 
+import java.util.Collection;
 import javax.cache.Cache;
 import javax.cache.integration.CacheLoaderException;
 import javax.cache.integration.CacheWriterException;
@@ -10,6 +11,7 @@ import org.rocksdb.ColumnFamilyHandle;
 import org.rocksdb.ReadOptions;
 import org.rocksdb.RocksDB;
 import org.rocksdb.RocksDBException;
+import org.rocksdb.WriteBatch;
 import org.rocksdb.WriteOptions;
 import ru.daradurvs.ignite.cache.store.rocksdb.serializer.JavaSerializer;
 import ru.daradurvs.ignite.cache.store.rocksdb.serializer.Serialiazer;
@@ -68,6 +70,25 @@ public class RocksDBCacheStore<K, V> extends CacheStoreAdapter<K, V> {
         }
         catch (RocksDBException e) {
             throw new CacheWriterException("Couldn't put entry, [key: " + entry.getKey() + "; value: " + entry.getValue() + "]", e);
+        }
+    }
+
+    /** {@inheritDoc} */
+    @Override public void writeAll(Collection<Cache.Entry<? extends K, ? extends V>> entries) {
+        try {
+            WriteBatch batch = new WriteBatch();
+
+            for (Cache.Entry<? extends K, ? extends V> entry : entries) {
+                batch.put(handle,
+                    serializer.serialize(entry.getKey()),
+                    serializer.serialize(entry.getValue())
+                );
+            }
+
+            db.write(writeOptions, batch);
+        }
+        catch (RocksDBException e) {
+            throw new CacheWriterException("Couldn't execute batch writing operation. [Entries number: " + entries.size() + "]", e);
         }
     }
 

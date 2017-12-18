@@ -2,6 +2,8 @@ package ru.daradurvs.ignite.cache.store.rocksdb.common;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import org.apache.ignite.Ignite;
 import org.apache.ignite.IgniteCache;
 import org.apache.ignite.Ignition;
@@ -16,6 +18,9 @@ import static org.junit.Assert.assertEquals;
  */
 @RunWith(Parameterized.class)
 public class CacheRocksDBPersistenceTest extends RocksDBPersistenceAbstractTest {
+    private static final int ENTRIES_NUMBER = 10_000;
+    private static final String TEST_PREFIX = "test";
+
     @Parameterized.Parameter
     public int nodesCount;
 
@@ -30,10 +35,7 @@ public class CacheRocksDBPersistenceTest extends RocksDBPersistenceAbstractTest 
     }
 
     @Test
-    public void testPartitionedCachePersistence() throws Exception {
-        final int entries = 10_000;
-        final String prefix = "test";
-
+    public void testPutIntoCachePersistence() throws Exception {
         try {
             Ignite ignite = startIgniteCluster(nodesCount());
 
@@ -41,14 +43,47 @@ public class CacheRocksDBPersistenceTest extends RocksDBPersistenceAbstractTest 
 
             IgniteCache<Integer, String> cache = ignite.getOrCreateCache(TEST_CACHE_NAME);
 
-            for (int i = 0; i < entries; i++) {
-                cache.put(i, prefix + i); // write through
+            for (int i = 0; i < ENTRIES_NUMBER; i++) {
+                cache.put(i, TEST_PREFIX + i); // write through
             }
         }
         finally {
             Ignition.stopAll(false);
         }
 
+        validateData();
+    }
+
+    @Test
+    public void testPutAllIntoCachePersistence() throws Exception {
+        try {
+            Ignite ignite = startIgniteCluster(nodesCount());
+
+            assertEquals(nodesCount(), ignite.cluster().nodes().size());
+
+            IgniteCache<Integer, String> cache = ignite.getOrCreateCache(TEST_CACHE_NAME);
+
+            for (int i = 0, j = 100; i < ENTRIES_NUMBER; ) {
+                Map<Integer, String> data = new HashMap<>();
+
+                for (int k = i + j; i < k && i < ENTRIES_NUMBER; i++) {
+                    data.put(i, TEST_PREFIX + i);
+                }
+
+                cache.putAll(data); // write through
+            }
+        }
+        finally {
+            Ignition.stopAll(false);
+        }
+
+        validateData();
+    }
+
+    /**
+     * @throws Exception In case of an error.
+     */
+    protected void validateData() throws Exception {
         try {
             Ignite ignite = startIgniteCluster(nodesCount());
 
@@ -56,8 +91,8 @@ public class CacheRocksDBPersistenceTest extends RocksDBPersistenceAbstractTest 
 
             assertEquals(nodesCount(), ignite.cluster().nodes().size());
 
-            for (int i = 0; i < entries; i++) {
-                assertEquals(prefix + i, cache.get(i)); // read through
+            for (int i = 0; i < ENTRIES_NUMBER; i++) {
+                assertEquals(TEST_PREFIX + i, cache.get(i)); // read through
             }
         }
         finally {
