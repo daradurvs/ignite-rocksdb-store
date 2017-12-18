@@ -87,12 +87,14 @@ public class CacheRocksDBPersistenceTest extends RocksDBPersistenceAbstractTest 
         try {
             Ignite ignite = startIgniteCluster(nodesCount());
 
-            IgniteCache<Integer, String> cache = ignite.getOrCreateCache(TEST_CACHE_NAME);
+            final IgniteCache<Object, Object> cache = ignite.getOrCreateCache(TEST_CACHE_NAME).withSkipStore();
 
             assertEquals(nodesCount(), ignite.cluster().nodes().size());
 
+            cache.loadCache(null);
+
             for (int i = 0; i < ENTRIES_NUMBER; i++) {
-                assertEquals(TEST_PREFIX + i, cache.get(i)); // read through
+                assertEquals(TEST_PREFIX + i, cache.get(i)); // read through disabled
             }
         }
         finally {

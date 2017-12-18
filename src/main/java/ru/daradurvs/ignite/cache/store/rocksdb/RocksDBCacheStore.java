@@ -6,11 +6,13 @@ import javax.cache.integration.CacheLoaderException;
 import javax.cache.integration.CacheWriterException;
 import org.apache.ignite.cache.store.CacheStoreAdapter;
 import org.apache.ignite.internal.processors.cache.store.CacheLocalStore;
+import org.apache.ignite.lang.IgniteBiInClosure;
 import org.jetbrains.annotations.NotNull;
 import org.rocksdb.ColumnFamilyHandle;
 import org.rocksdb.ReadOptions;
 import org.rocksdb.RocksDB;
 import org.rocksdb.RocksDBException;
+import org.rocksdb.RocksIterator;
 import org.rocksdb.WriteBatch;
 import org.rocksdb.WriteOptions;
 import ru.daradurvs.ignite.cache.store.rocksdb.serializer.JavaSerializer;
@@ -41,6 +43,19 @@ public class RocksDBCacheStore<K, V> extends CacheStoreAdapter<K, V> {
         this.writeOptions = writeOptions;
         this.readOptions = readOptions;
         this.serializer = serializer;
+    }
+
+    /** {@inheritDoc} */
+    @SuppressWarnings("unchecked")
+    @Override public void loadCache(IgniteBiInClosure<K, V> clo, Object... args) {
+        RocksIterator iter = db.newIterator(handle, readOptions);
+
+        for (iter.seekToFirst(); iter.isValid(); iter.next()) {
+            clo.apply(
+                (K)serializer.deserialize(iter.key()),
+                (V)serializer.deserialize(iter.value())
+            );
+        }
     }
 
     /** {@inheritDoc} */
