@@ -1,6 +1,7 @@
 package ru.daradurvs.ignite.cache.store.rocksdb;
 
 import java.util.Collection;
+import java.util.Map;
 import javax.cache.Cache;
 import javax.cache.integration.CacheLoaderException;
 import javax.cache.integration.CacheWriterException;
@@ -114,6 +115,25 @@ public class RocksDBCacheStore<K, V> extends CacheStoreAdapter<K, V> {
         }
         catch (RocksDBException e) {
             throw new CacheWriterException("Couldn't delete a value for the key: " + key, e);
+        }
+    }
+
+    /** {@inheritDoc} */
+    @Override public void deleteAll(Collection<?> keys) {
+        try {
+            WriteBatch batch = new WriteBatch();
+
+            for (Object key : keys) {
+                batch.remove(
+                    handle,
+                    serializer.serialize(key)
+                );
+            }
+
+            db.write(writeOptions, batch);
+        }
+        catch (RocksDBException e) {
+            throw new CacheWriterException("Couldn't execute batch deleting operation. [Keys number: " + keys.size() + "]", e);
         }
     }
 }
