@@ -1,6 +1,9 @@
 package ru.daradurvs.ignite.cache.store.rocksdb;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import javax.cache.Cache;
 import javax.cache.integration.CacheLoaderException;
@@ -56,6 +59,43 @@ public class RocksDBCacheStore<K, V> extends CacheStoreAdapter<K, V> {
                 (K)serializer.deserialize(iter.key()),
                 (V)serializer.deserialize(iter.value())
             );
+        }
+    }
+
+    /** {@inheritDoc} */
+    @SuppressWarnings("unchecked")
+    @Override public Map<K, V> loadAll(Iterable<? extends K> keys) {
+        assert keys != null;
+
+        try {
+            List<byte[]> preparedKeys = new ArrayList<>();
+            List<ColumnFamilyHandle> handles = new ArrayList<>();
+
+            for (K key : keys) {
+                preparedKeys.add(serializer.serialize(key));
+
+                handles.add(handle);
+            }
+
+            Map<byte[], byte[]> loaded = db.multiGet(
+                readOptions,
+                handles,
+                preparedKeys
+            );
+
+            Map<Object, Object> result = new HashMap<>();
+
+            for (Map.Entry<byte[], byte[]> entry : loaded.entrySet()) {
+                result.put(
+                    serializer.deserialize(entry.getKey()),
+                    serializer.deserialize(entry.getValue())
+                );
+            }
+
+            return (Map<K, V>)result;
+        }
+        catch (RocksDBException e) {
+            throw new CacheLoaderException("Couldn't execute multiGet operation.", e);
         }
     }
 
