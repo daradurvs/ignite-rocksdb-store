@@ -26,7 +26,7 @@ public class CacheRocksDBPersistenceTest extends RocksDBPersistenceAbstractTest 
 
     @Parameterized.Parameters(name = "Nodes count = {0}")
     public static Collection<Integer> counts() {
-        return Arrays.asList(1, 2, 3, 4, 5);
+        return Arrays.asList(1, 2, 3);
     }
 
     /** {@inheritDoc} */
@@ -90,6 +90,46 @@ public class CacheRocksDBPersistenceTest extends RocksDBPersistenceAbstractTest 
             final IgniteCache<Object, Object> cache = ignite.getOrCreateCache(TEST_CACHE_NAME).withSkipStore();
 
             assertEquals(nodesCount(), ignite.cluster().nodes().size());
+
+            cache.loadCache(null);
+
+            for (int i = 0; i < ENTRIES_NUMBER; i++) {
+                assertEquals(TEST_PREFIX + i, cache.get(i)); // read through disabled
+            }
+        }
+        finally {
+            Ignition.stopAll(false);
+        }
+    }
+
+
+    @Test
+    public void testPutIntoCachePersistenceFromClientNode() throws Exception {
+        try {
+            startIgniteCluster(nodesCount());
+
+            Ignite client = startIgniteCluster(igniteConfiguration("client", true));
+
+            assertEquals(nodesCount() + 1, client.cluster().nodes().size());
+
+            IgniteCache<Integer, String> cache = client.getOrCreateCache(TEST_CACHE_NAME);
+
+            for (int i = 0; i < ENTRIES_NUMBER; i++) {
+                cache.put(i, TEST_PREFIX + i); // write through
+            }
+        }
+        finally {
+            Ignition.stopAll(false);
+        }
+
+        try {
+            startIgniteCluster(nodesCount());
+
+            Ignite client = startIgniteCluster(igniteConfiguration("client", true));
+
+            assertEquals(nodesCount() + 1, client.cluster().nodes().size());
+
+            IgniteCache<Integer, String> cache = client.getOrCreateCache(TEST_CACHE_NAME);
 
             cache.loadCache(null);
 

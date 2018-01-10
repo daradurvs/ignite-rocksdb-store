@@ -65,24 +65,37 @@ public abstract class RocksDBPersistenceAbstractTest {
      * Starts Ignite node with given name.
      *
      * @param name Ignite instance name.
-     * @return Started ignite node.
+     * @return Started Ignite node.
      * @throws Exception In case of an error.
      */
     protected Ignite startIgniteCluster(String name) throws Exception {
-        IgniteConfiguration cfg = igniteConfiguration(name);
+        IgniteConfiguration cfg = igniteConfiguration(name, false);
 
+        return startIgniteCluster(cfg);
+    }
+
+    /**
+     * Starts Ignite node with given configuration.
+     *
+     * @param cfg Ignite configuration.
+     * @return Started Ignite node.
+     * @throws Exception In case of an error.
+     */
+    protected Ignite startIgniteCluster(IgniteConfiguration cfg) throws Exception {
         return Ignition.start(cfg);
     }
 
     /**
      * @param instanceName Ignite instance name.
+     * @param clientMode Client mode.
      * @return Ignite configuration.
      * @throws Exception In case of an error.
      */
-    protected IgniteConfiguration igniteConfiguration(String instanceName) throws Exception {
+    protected IgniteConfiguration igniteConfiguration(String instanceName, boolean clientMode) throws Exception {
         IgniteConfiguration cfg = new IgniteConfiguration();
         cfg.setIgniteInstanceName(instanceName);
         cfg.setConsistentId(instanceName);
+        cfg.setClientMode(clientMode);
 
         cfg.setCacheConfiguration(getCacheConfiguration(cfg));
 
