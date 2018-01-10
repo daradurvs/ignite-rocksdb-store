@@ -37,7 +37,7 @@ public class DBOptionsExternalizableWrapper implements Externalizable {
         out.writeBoolean(dbOptions.createIfMissing());
         out.writeBoolean(dbOptions.createMissingColumnFamilies());
         out.writeLong(dbOptions.compactionReadaheadSize());
-        out.writeBytes(dbOptions.dbLogDir());
+        out.writeUTF(dbOptions.dbLogDir());
         out.writeLong(dbOptions.dbWriteBufferSize());
         out.writeLong(dbOptions.delayedWriteRate());
         out.writeLong(dbOptions.deleteObsoleteFilesPeriodMicros());
@@ -76,7 +76,7 @@ public class DBOptionsExternalizableWrapper implements Externalizable {
         dbOptions.setCreateIfMissing(in.readBoolean());
         dbOptions.setCreateMissingColumnFamilies(in.readBoolean());
         dbOptions.setCompactionReadaheadSize(in.readLong());
-        dbOptions.setDbLogDir(in.readLine());
+        dbOptions.setDbLogDir(in.readUTF());
         dbOptions.setDbWriteBufferSize(in.readLong());
         dbOptions.setDelayedWriteRate(in.readLong());
         dbOptions.setDeleteObsoleteFilesPeriodMicros(in.readLong());

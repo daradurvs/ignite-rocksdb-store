@@ -31,6 +31,14 @@ public class RocksDBCacheStore<K, V> extends CacheStoreAdapter<K, V> {
     private final ReadOptions readOptions;
     private final Serialiazer serializer;
 
+    protected RocksDBCacheStore() {
+        this.db = null;
+        this.handle = null;
+        this.writeOptions = null;
+        this.readOptions = null;
+        this.serializer = null;
+    }
+
     public RocksDBCacheStore(@NotNull RocksDB db, @NotNull ColumnFamilyHandle handle) {
         this(db, handle, new JavaSerializer());
     }

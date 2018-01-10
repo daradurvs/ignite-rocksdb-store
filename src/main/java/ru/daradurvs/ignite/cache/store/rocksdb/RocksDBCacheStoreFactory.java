@@ -34,6 +34,9 @@ public class RocksDBCacheStoreFactory<K, V> implements Factory<RocksDBCacheStore
     }
 
     private void registerDestructor(IgniteConfiguration cfg) {
+        if (Utils.isClientMode(cfg))
+            return;
+
         LifecycleBean[] beans = cfg.getLifecycleBeans();
 
         if (beans == null) {
@@ -61,6 +64,9 @@ public class RocksDBCacheStoreFactory<K, V> implements Factory<RocksDBCacheStore
     /** {@inheritDoc} */
     @Override public RocksDBCacheStore<K, V> create() {
         try {
+            if (Utils.isClientMode(ignite))
+                return new RocksDBClientStubCacheStore<>();
+
             validate(dbCfg);
 
             String consistentNodeId = Utils.getConsistentId(ignite);
