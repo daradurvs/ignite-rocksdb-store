@@ -31,15 +31,17 @@
 		
 		<property name="cacheConfiguration">
 			<list>
-				<bean class="org.apache.ignite.configuration.CacheConfiguration" parent="transactional-rocksdb-cache.cfg">
-					<property name="cacheStoreFactory">
-						<bean class="ru.daradurvs.ignite.cache.store.rocksdb.RocksDBCacheStoreFactory">
-							<constructor-arg index="0" ref="syncwrite-rocksdb.cfg"/>
-							<constructor-arg index="1" ref="ignite.cfg"/>
-						</bean>
-					</property>
-				</bean>
+				<!--ref bean="rocksdb-cache.cfg"/-->
 			</list>
+		</property>
+	</bean>
+
+	<bean id="rocksdb-cache.cfg" class="org.apache.ignite.configuration.CacheConfiguration" parent="transactional-rocksdb-cache.cfg">
+		<property name="cacheStoreFactory">
+			<bean class="ru.daradurvs.ignite.cache.store.rocksdb.RocksDBCacheStoreFactory">
+				<constructor-arg index="0" ref="syncwrite-rocksdb.cfg"/>
+				<constructor-arg index="1" ref="ignite.cfg"/>
+			</bean>
 		</property>
 	</bean>
 

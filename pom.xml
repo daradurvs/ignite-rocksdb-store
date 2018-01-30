@@ -63,6 +63,14 @@
         </dependency>
 
         <dependency>
+            <groupId>ignite-cod-data-loader</groupId>
+            <artifactId>ignite-cod-data-loader</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/libs/ignite-cod-data-loader-0.0.1-SNAPSHOT.jar</systemPath>
+        </dependency>
+
+        <dependency>
             <groupId>org.yardstickframework</groupId>
             <artifactId>yardstick</artifactId>
             <version>0.8.3</version>
