@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata>
+  <groupId>ignite-cod-data-loader</groupId>
+  <artifactId>ignite-cod-data-loader</artifactId>
+  <versioning>
+    <versions>
+      <version>0.0.1-SNAPSHOT</version>
+    </versions>
+    <lastUpdated>20180206090241</lastUpdated>
+  </versioning>
+</metadata>
