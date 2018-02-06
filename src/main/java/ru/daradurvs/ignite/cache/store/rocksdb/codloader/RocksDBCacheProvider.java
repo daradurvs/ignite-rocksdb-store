@@ -1,8 +1,7 @@
 package ru.daradurvs.ignite.cache.store.rocksdb.codloader;
 
+import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import org.apache.ignite.IgniteCheckedException;
 import org.apache.ignite.configuration.CacheConfiguration;
 import org.apache.ignite.internal.IgniteComponentType;
@@ -21,9 +20,11 @@ public class RocksDBCacheProvider<K, V> implements CacheConfigurationProvider<K,
             String beanName = System.getProperty("CACHE_CONFIG_BEAN_NAME");
             String cfgPath = System.getProperty("IGNITE_CONFIG_URL");
 
-            cacheCfg = spring.loadBean(Files.newInputStream(Paths.get(cfgPath)), beanName);
+            cacheCfg = spring.loadBean(new File(cfgPath).toURI().toURL(), beanName);
 
             assert cacheCfg != null;
+
+            cacheCfg.setName(s);
         }
         catch (IgniteCheckedException | IOException e) {
             X.printerrln(e.getMessage(), e);

@@ -1,5 +1,6 @@
 package ru.daradurvs.ignite.cache.store.rocksdb.serializer;
 
+import com.sbt.dpl.gridgain.AffinityParticleKey;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collection;
@@ -48,6 +49,13 @@ public class SerializerImplTest {
     @Test
     public void testNullSerialization() throws Exception {
         assertNull(serializeDeserialize(null));
+    }
+
+    @Test
+    public void testNullSerialization3() throws Exception {
+        AffinityParticleKey sut = new AffinityParticleKey(1, 1, 1);
+
+        assertEquals(sut, serializeDeserialize(new AffinityParticleKey(1, 1, 1)));
     }
 
     private Object serializeDeserialize(Object obj) {
